@@ -40,9 +40,9 @@
     .cal-day.empty { background: transparent; border-color: transparent; }
     .cal-day.status-done { background: #D8ECC8; border-color: #90B870; }
     .cal-day.status-hike { background: #D8ECC8; border-color: #90B870; }
-    .cal-day.status-rest { background: #F2ECF0; border-color: #C8B0C0; }
+    .cal-day.status-rest { background: #DDEEF8; border-color: #90C0D8; }
     .week-row.status-hike { background: #D8ECC8; }
-    .week-row.status-rest { background: #F2ECF0; }
+    .week-row.status-rest { background: #DDEEF8; }
     .cal-day.status-skipped { background: #F5E4D8; border-color: #C09070; }
     .cal-date { font-size: 10px; color: #2a2a28; margin-bottom: 3px; }
     .cal-day.status-done .cal-date,
@@ -55,10 +55,10 @@
     .status-select { font-size: 10px; border: 0.5px solid rgba(0,0,0,0.18); border-radius: 3px; background: #f8f7f4; color: #111110; cursor: pointer; padding: 2px 3px; line-height: 1.4; width: 100%; }
     .status-select.is-done { background: #D8ECC8; color: #2A5010; border-color: #90B870; font-weight: 500; }
     .status-select.is-hike { background: #D8ECC8; color: #2A5010; border-color: #90B870; font-weight: 500; }
-    .status-select.is-rest { background: #F2ECF0; color: #503848; border-color: #C8B0C0; font-weight: 500; }
+    .status-select.is-rest { background: #DDEEF8; color: #1A3A50; border-color: #90C0D8; font-weight: 500; }
     .status-select.is-skipped { background: #F5E4D8; color: #6B3018; border-color: #C09070; font-weight: 500; }
     .rating-select { font-size: 10px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 3px; background: #f8f7f4; color: #111110; cursor: pointer; padding: 2px 3px; line-height: 1.4; width: 100%; }
-    .rating-display { font-size: 13px; }
+    .rating-display { font-size: 18px; }
 
     /* Mobile week list */
     .week-list { display: none; }
@@ -76,10 +76,10 @@
     .week-status-select { font-size: 12px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 4px; background: #f8f7f4; color: #111110; cursor: pointer; padding: 3px 6px; width: 100%; }
     .week-status-select.is-done { background: #D8ECC8; color: #2A5010; border-color: #90B870; font-weight: 500; }
     .week-status-select.is-hike { background: #D8ECC8; color: #2A5010; border-color: #90B870; font-weight: 500; }
-    .week-status-select.is-rest { background: #F2ECF0; color: #503848; border-color: #C8B0C0; font-weight: 500; }
+    .week-status-select.is-rest { background: #DDEEF8; color: #1A3A50; border-color: #90C0D8; font-weight: 500; }
     .week-status-select.is-skipped { background: #F5E4D8; color: #6B3018; border-color: #C09070; font-weight: 500; }
     .week-rating-select { font-size: 13px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 4px; background: #f8f7f4; cursor: pointer; padding: 2px 4px; width: 100%; }
-    .rating-display { font-size: 14px; }
+    .rating-display { font-size: 20px; }
 
     @media (max-width: 600px) {
       .cal-grid-wrap { display: none; }
@@ -362,7 +362,7 @@
         const s = document.createElement('div');
         s.className = 'done-summary';
         s.style.display = 'none';
-        s.style.fontSize = '12px';
+        s.style.fontSize = '18px';
         s.style.marginTop = '4px';
         s.style.cursor = 'pointer';
         s.style.color = '#5f5e5a';
@@ -394,7 +394,8 @@
         const summary = card.querySelector('.done-summary');
         if (summary) {
           const label = status === 'done' ? '✅' : status === 'skipped' ? '❌' : status === 'hike' ? '🥾' : status === 'rest' ? '💤' : '';
-          summary.textContent = [label, entry.rating || ''].filter(Boolean).join(' · ') + ' · edit';
+          const emoji = [label, entry.rating || ''].filter(Boolean).join(' ');
+          summary.innerHTML = '<span style="font-size:18px;">' + emoji + '</span><span style="font-size:9px;color:#888;margin-left:5px;">· edit</span>';
         }
       }
 
@@ -412,7 +413,8 @@
         const summary = row.querySelector('.done-summary');
         if (summary) {
           const label = status === 'done' ? '✅' : status === 'skipped' ? '❌' : status === 'hike' ? '🥾' : status === 'rest' ? '💤' : '';
-          summary.textContent = [label, entry.rating || ''].filter(Boolean).join(' · ') + ' · edit';
+          const emoji = [label, entry.rating || ''].filter(Boolean).join(' ');
+          summary.innerHTML = '<span style="font-size:20px;">' + emoji + '</span><span style="font-size:9px;color:#888;margin-left:5px;">· edit</span>';
         }
       }
 
