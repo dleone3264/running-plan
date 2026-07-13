@@ -34,7 +34,7 @@
     .cal-month-label { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
     .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
     .cal-dow { font-size: 11px; color: #888780; text-align: center; padding: 3px 0 5px; font-weight: 500; }
-    .cal-day { border-radius: 7px; padding: 5px 6px; min-height: 90px; border: 0.5px solid rgba(0,0,0,0.11); background: #fff; position: relative; transition: background 0.2s, border-color 0.2s; }
+    .cal-day { border-radius: 7px; padding: 5px 6px; min-height: 90px; border: 0.5px solid rgba(0,0,0,0.11); background: #fff; position: relative; transition: background 0.2s, border-color 0.2s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
     .cal-day.empty { background: transparent; border-color: transparent; }
     .cal-date { font-size: 10px; color: #2a2a28; margin-bottom: 3px; }
     .cal-event { font-size: 10px; border-radius: 3px; padding: 2px 4px; margin-bottom: 2px; line-height: 1.3; display: block; font-weight: 500; }
@@ -573,45 +573,68 @@ function initDragDrop() {
     });
   });
 
-  // Touch drag — attached to document to avoid passive listener conflicts
   let touchClone = null;
   let touchSourceId = null;
+  let touchSourceCell = null;
   let longPressTimer = null;
   let isDragging = false;
+  let startX = 0, startY = 0;
+
+  function cancelLongPress() {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  }
+
+  function startDrag(cell, touch) {
+    isDragging = true;
+    touchSourceCell = cell;
+    touchSourceId = cell.dataset.day;
+    const rect = cell.getBoundingClientRect();
+    touchClone = cell.cloneNode(true);
+    touchClone.style.cssText = `
+      position:fixed;
+      opacity:0.85;
+      pointer-events:none;
+      z-index:9999;
+      width:${rect.width}px;
+      height:${rect.height}px;
+      left:${rect.left}px;
+      top:${rect.top}px;
+      border-radius:7px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.25);
+      transition:none;
+      user-select:none;
+      -webkit-user-select:none;
+    `;
+    document.body.appendChild(touchClone);
+    cell.style.opacity = '0.3';
+    if (navigator.vibrate) navigator.vibrate(50);
+  }
 
   document.addEventListener('touchstart', e => {
     const cell = e.target.closest('.cal-day[data-day]');
     if (!cell) return;
-    touchSourceId = cell.dataset.day;
-    isDragging = false;
-
-    // Long press to initiate drag (500ms)
+    // Ignore touches on selects and buttons
+    if (e.target.closest('select') || e.target.closest('button')) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    cancelLongPress();
     longPressTimer = setTimeout(() => {
-      isDragging = true;
-      const touch = e.touches[0];
-      touchClone = cell.cloneNode(true);
-      touchClone.style.cssText = `position:fixed;opacity:0.75;pointer-events:none;z-index:9999;
-        width:${cell.offsetWidth}px;border-radius:7px;
-        left:${touch.clientX - cell.offsetWidth/2}px;
-        top:${touch.clientY - 40}px;
-        box-shadow:0 4px 12px rgba(0,0,0,0.2);`;
-      document.body.appendChild(touchClone);
-      cell.style.opacity = '0.4';
-      // Haptic feedback if available
-      if (navigator.vibrate) navigator.vibrate(40);
+      startDrag(cell, e.touches[0]);
     }, 500);
   }, {passive: true});
 
   document.addEventListener('touchmove', e => {
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    const dx = Math.abs(e.touches[0].clientX - startX);
+    const dy = Math.abs(e.touches[0].clientY - startY);
+    // Cancel long press if finger moved significantly
+    if (!isDragging && (dx > 8 || dy > 8)) cancelLongPress();
     if (!isDragging || !touchClone) return;
     e.preventDefault();
     const touch = e.touches[0];
-    touchClone.style.left = (touch.clientX - parseInt(touchClone.style.width)/2) + 'px';
-    touchClone.style.top = (touch.clientY - 40) + 'px';
-    // Highlight target
+    const rect = touchClone.getBoundingClientRect();
+    touchClone.style.left = (touch.clientX - rect.width / 2) + 'px';
+    touchClone.style.top = (touch.clientY - rect.height / 2) + 'px';
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-    // Temporarily hide clone to find element underneath
     touchClone.style.display = 'none';
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     touchClone.style.display = '';
@@ -620,28 +643,23 @@ function initDragDrop() {
   }, {passive: false});
 
   document.addEventListener('touchend', e => {
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-    if (!isDragging) { touchSourceId = null; return; }
+    cancelLongPress();
+    if (!isDragging) { touchSourceId = null; touchSourceCell = null; return; }
     isDragging = false;
     if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
-    // Restore source opacity
-    const srcCell = document.querySelector(`.cal-day[data-day="${touchSourceId}"]`);
-    if (srcCell) srcCell.style.opacity = '';
-    const touch = e.changedTouches[0];
+    if (touchSourceCell) { touchSourceCell.style.opacity = ''; touchSourceCell = null; }
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+    const touch = e.changedTouches[0];
     const el = document.elementFromPoint(touch.clientX, touch.clientY);
     const target = el && el.closest('.cal-day[data-day]');
-    if (target && touchSourceId && target.dataset.day !== touchSourceId) {
-      doMove(touchSourceId, target.dataset.day);
-    }
+    if (target && touchSourceId && target.dataset.day !== touchSourceId) doMove(touchSourceId, target.dataset.day);
     touchSourceId = null;
   }, {passive: true});
 
   document.addEventListener('touchcancel', () => {
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    cancelLongPress();
     if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
-    const srcCell = touchSourceId && document.querySelector(`.cal-day[data-day="${touchSourceId}"]`);
-    if (srcCell) srcCell.style.opacity = '';
+    if (touchSourceCell) { touchSourceCell.style.opacity = ''; touchSourceCell = null; }
     isDragging = false; touchSourceId = null;
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
   }, {passive: true});
