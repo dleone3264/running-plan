@@ -571,36 +571,80 @@ function initDragDrop() {
       if (dragSourceId && toId && dragSourceId !== toId) doMove(dragSourceId, toId);
       dragSourceId = null;
     });
-    // Touch
-    let touchClone = null;
-    cell.addEventListener('touchstart', e => {
-      dragSourceId = cell.dataset.day;
+  });
+
+  // Touch drag — attached to document to avoid passive listener conflicts
+  let touchClone = null;
+  let touchSourceId = null;
+  let longPressTimer = null;
+  let isDragging = false;
+
+  document.addEventListener('touchstart', e => {
+    const cell = e.target.closest('.cal-day[data-day]');
+    if (!cell) return;
+    touchSourceId = cell.dataset.day;
+    isDragging = false;
+
+    // Long press to initiate drag (500ms)
+    longPressTimer = setTimeout(() => {
+      isDragging = true;
       const touch = e.touches[0];
       touchClone = cell.cloneNode(true);
-      touchClone.style.cssText = `position:fixed;opacity:0.7;pointer-events:none;z-index:9999;width:${cell.offsetWidth}px;left:${touch.clientX}px;top:${touch.clientY}px;`;
+      touchClone.style.cssText = `position:fixed;opacity:0.75;pointer-events:none;z-index:9999;
+        width:${cell.offsetWidth}px;border-radius:7px;
+        left:${touch.clientX - cell.offsetWidth/2}px;
+        top:${touch.clientY - 40}px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.2);`;
       document.body.appendChild(touchClone);
-      cell.classList.add('dragging');
-    }, {passive:true});
-    cell.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      if (touchClone) { touchClone.style.left = (touch.clientX-40)+'px'; touchClone.style.top = (touch.clientY-40)+'px'; }
-      document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-      const el = document.elementFromPoint(touch.clientX, touch.clientY);
-      const target = el && el.closest('.cal-day[data-day]');
-      if (target && target.dataset.day !== dragSourceId) target.classList.add('drag-over');
-    }, {passive:false});
-    cell.addEventListener('touchend', e => {
-      cell.classList.remove('dragging');
-      if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
-      const touch = e.changedTouches[0];
-      const el = document.elementFromPoint(touch.clientX, touch.clientY);
-      const target = el && el.closest('.cal-day[data-day]');
-      document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-      if (target && dragSourceId && target.dataset.day !== dragSourceId) doMove(dragSourceId, target.dataset.day);
-      dragSourceId = null;
-    });
-  });
+      cell.style.opacity = '0.4';
+      // Haptic feedback if available
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, 500);
+  }, {passive: true});
+
+  document.addEventListener('touchmove', e => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (!isDragging || !touchClone) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchClone.style.left = (touch.clientX - parseInt(touchClone.style.width)/2) + 'px';
+    touchClone.style.top = (touch.clientY - 40) + 'px';
+    // Highlight target
+    document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+    // Temporarily hide clone to find element underneath
+    touchClone.style.display = 'none';
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    touchClone.style.display = '';
+    const target = el && el.closest('.cal-day[data-day]');
+    if (target && target.dataset.day !== touchSourceId) target.classList.add('drag-over');
+  }, {passive: false});
+
+  document.addEventListener('touchend', e => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (!isDragging) { touchSourceId = null; return; }
+    isDragging = false;
+    if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
+    // Restore source opacity
+    const srcCell = document.querySelector(`.cal-day[data-day="${touchSourceId}"]`);
+    if (srcCell) srcCell.style.opacity = '';
+    const touch = e.changedTouches[0];
+    document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const target = el && el.closest('.cal-day[data-day]');
+    if (target && touchSourceId && target.dataset.day !== touchSourceId) {
+      doMove(touchSourceId, target.dataset.day);
+    }
+    touchSourceId = null;
+  }, {passive: true});
+
+  document.addEventListener('touchcancel', () => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
+    const srcCell = touchSourceId && document.querySelector(`.cal-day[data-day="${touchSourceId}"]`);
+    if (srcCell) srcCell.style.opacity = '';
+    isDragging = false; touchSourceId = null;
+    document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
+  }, {passive: true});
 }
 
 function doMove(fromId, toId) {
