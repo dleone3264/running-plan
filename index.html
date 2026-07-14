@@ -230,9 +230,9 @@ const PLAN = [
   { id:'jul28', date:'28', dow:'Tue', label:'28', workouts:[{cls:'ev-run', lines:['Easy 25 min']},{cls:'ev-run', lines:['Strides 6×20s']},{cls:'ev-warmcool', lines:['Walk CD 3 min'],'total':'Total: ~30 min'}] },
   { id:'jul29', date:'29', dow:'Wed', label:'29', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'Total: 1 hr'}] },
   { id:'jul30', date:'30', dow:'Thu', label:'30', workouts:[{cls:'ev-strength', lines:['Strength'], total:'Total: 20 min'}] },
-  { id:'jul31', date:'31', dow:'Fri', label:'31', workouts:[{cls:'ev-warmcool', lines:['WU 8 min easy']},{cls:'ev-run', lines:['Hills 6× / 8%']},{cls:'ev-warmcool', lines:['CD 5 min easy'],'total':'Total: ~35 min'}] },
+  { id:'jul31', date:'31', dow:'Fri', label:'31', workouts:[{cls:'ev-run', lines:['Shakeout 20 min','Very easy pace'], total:'Total: 20 min'}] },
   { id:'aug1',  date:'1',  dow:'Sat', label:'1',  hikeRest:true },
-  { id:'aug2',  date:'2',  dow:'Sun', label:'2',  hikeRest:true },
+  { id:'aug2',  date:'2',  dow:'Sun', label:'2',  workouts:[{cls:'ev-run', lines:['5k Race 🎉'], total:'~31–34 min goal'}] },
   // WEEK 7
   { id:'aug3',  date:'3',  dow:'Mon', label:'3 — Wk 7', workouts:[{cls:'ev-strength', lines:['Strength'], total:'Total: 30 min'}] },
   { id:'aug4',  date:'4',  dow:'Tue', label:'4',  workouts:[{cls:'ev-run', lines:['Easy 30 min','12:00–13:20 /mi'], total:'Total: 30 min'}] },
@@ -255,7 +255,7 @@ const WEEKS = [
   { label:'Week 3 · Jul 6–12', days: PLAN.slice(14,21) },
   { label:'Week 4 · Jul 13–19', days: PLAN.slice(21,28) },
   { label:'Week 5 · Jul 20–26', days: PLAN.slice(28,35) },
-  { label:'Week 6 · Jul 27–Aug 2', days: PLAN.slice(35,42) },
+  { label:'Week 6 · Jul 27–Aug 2 · 5k Race Sunday', days: PLAN.slice(35,42) },
   { label:'Week 7 · Aug 3–8 · Final week', days: PLAN.slice(42) },
 ];
 
@@ -626,7 +626,6 @@ function initDragDrop() {
   document.addEventListener('touchmove', e => {
     const dx = Math.abs(e.touches[0].clientX - startX);
     const dy = Math.abs(e.touches[0].clientY - startY);
-    // Cancel long press if finger moved significantly
     if (!isDragging && (dx > 8 || dy > 8)) cancelLongPress();
     if (!isDragging || !touchClone) return;
     e.preventDefault();
@@ -635,10 +634,7 @@ function initDragDrop() {
     touchClone.style.left = (touch.clientX - rect.width / 2) + 'px';
     touchClone.style.top = (touch.clientY - rect.height / 2) + 'px';
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
-    touchClone.style.display = 'none';
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    touchClone.style.display = '';
-    const target = el && el.closest('.cal-day[data-day]');
+    const target = findCellAtPoint(touch.clientX, touch.clientY);
     if (target && target.dataset.day !== touchSourceId) target.classList.add('drag-over');
   }, {passive: false});
 
@@ -650,8 +646,7 @@ function initDragDrop() {
     if (touchSourceCell) { touchSourceCell.style.opacity = ''; touchSourceCell = null; }
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
     const touch = e.changedTouches[0];
-    const el = document.elementFromPoint(touch.clientX, touch.clientY);
-    const target = el && el.closest('.cal-day[data-day]');
+    const target = findCellAtPoint(touch.clientX, touch.clientY);
     if (target && touchSourceId && target.dataset.day !== touchSourceId) doMove(touchSourceId, target.dataset.day);
     touchSourceId = null;
   }, {passive: true});
@@ -663,6 +658,15 @@ function initDragDrop() {
     isDragging = false; touchSourceId = null;
     document.querySelectorAll('.drag-over').forEach(c => c.classList.remove('drag-over'));
   }, {passive: true});
+}
+
+function findCellAtPoint(x, y) {
+  const cells = document.querySelectorAll('.cal-day[data-day]');
+  for (const cell of cells) {
+    const r = cell.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return cell;
+  }
+  return null;
 }
 
 function doMove(fromId, toId) {
