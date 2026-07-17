@@ -312,10 +312,13 @@ function getDayState(id, d) {
 }
 
 function getMovesTo(id, d) {
-  // Returns array of {fromId, workouts} for workouts moved onto this day
   return Object.keys(d)
     .filter(k => k.startsWith('move_to_' + id + '_from_'))
     .map(k => ({ fromId: k.replace('move_to_' + id + '_from_', ''), html: d[k] }));
+}
+
+function getReplaceFrom(id, d) {
+  return d['move_replace_' + id] || null;
 }
 
 function getMoveFrom(id, d) {
@@ -349,6 +352,7 @@ function renderDesktop(d) {
       const state = getDayState(day.id, d);
       const movesTo = getMovesTo(day.id, d);
       const movedFrom = getMoveFrom(day.id, d);
+      const replaceFrom = getReplaceFrom(day.id, d);
       const statusCls = cellStatusClass(day.id, d, movesTo);
       html += `<div class="cal-day ${statusCls}" id="d-${day.id}" draggable="true" data-day="${day.id}">`;
       html += `<button class="reset-btn" onclick="resetDay('${day.id}',event)" title="Reset day">↺</button>`;
@@ -356,13 +360,18 @@ function renderDesktop(d) {
       // Original workout block
       if (movedFrom) {
         html += `<span class="moved-pill">➡️ Moved</span>`;
+      } else if (replaceFrom) {
+        // Show the moved workout instead of hike/rest
+        const fromDay = PLAN.find(p => p.id === replaceFrom);
+        if (fromDay) html += pillsHTML(fromDay.workouts);
+        html += desktopControls(day.id, state, false, false);
       } else if (day.hikeRest) {
         html += `<span class="cal-event ev-hike">Hike / rest</span>`;
+        html += desktopControls(day.id, state, true, false);
       } else {
         html += pillsHTML(day.workouts);
+        html += desktopControls(day.id, state, false, !!movedFrom);
       }
-      // Controls for original workout
-      html += desktopControls(day.id, state, day.hikeRest, !!movedFrom);
       // Moved workouts appended below
       movesTo.forEach(m => {
         const fromDay = PLAN.find(p => p.id === m.fromId);
@@ -428,26 +437,39 @@ function renderMobile(d) {
       const state = getDayState(day.id, d);
       const movesTo = getMovesTo(day.id, d);
       const movedFrom = getMoveFrom(day.id, d);
+      const replaceFrom = getReplaceFrom(day.id, d);
       const statusCls = cellStatusClass(day.id, d, movesTo);
       html += `<div class="week-row ${statusCls}" id="m-${day.id}">`;
       html += `<div class="week-dow">${day.dow}</div><div class="week-date">${day.date}</div>`;
       html += `<div class="week-events">`;
       if (movedFrom) {
         html += `<span class="week-pill" style="background:#f5f5f5;color:#999;border:1px dashed #bbb;">➡️ Moved</span>`;
+      } else if (replaceFrom) {
+        const fromDay = PLAN.find(p => p.id === replaceFrom);
+        if (fromDay) html += weekPillsHTML(fromDay.workouts);
+        const status = state.status || '';
+        const selCls = status ? ` is-${status}` : '';
+        html += `<div class="week-controls">
+          <select class="week-status-select${selCls}" onchange="setStatus('${day.id}',this.value)">${statusOptions(false)}</select>
+          <select class="week-rating-select" onchange="rate('${day.id}',this.value)">${ratingOptions()}</select>
+        </div>`;
       } else if (day.hikeRest) {
         html += `<span class="week-pill ev-hike">Hike / rest</span>`;
+        const status = state.status || '';
+        const selCls = status ? ` is-${status}` : '';
+        html += `<div class="week-controls">
+          <select class="week-status-select${selCls}" onchange="setStatus('${day.id}',this.value)">${statusOptions(true)}</select>
+        </div>`;
       } else {
         html += weekPillsHTML(day.workouts);
-      }
-      // Mobile controls
-      const status = state.status || '';
-      const rating = state.rating || '';
-      const selCls = status ? ` is-${status}` : '';
-      if (!movedFrom) {
-        html += `<div class="week-controls">
-          <select class="week-status-select${selCls}" onchange="setStatus('${day.id}',this.value)">${statusOptions(day.hikeRest)}</select>
-          ${!day.hikeRest ? `<select class="week-rating-select" onchange="rate('${day.id}',this.value)">${ratingOptions()}</select>` : ''}
-        </div>`;
+        if (!movedFrom) {
+          const status = state.status || '';
+          const selCls = status ? ` is-${status}` : '';
+          html += `<div class="week-controls">
+            <select class="week-status-select${selCls}" onchange="setStatus('${day.id}',this.value)">${statusOptions(false)}</select>
+            <select class="week-rating-select" onchange="rate('${day.id}',this.value)">${ratingOptions()}</select>
+          </div>`;
+        }
       }
       // Moved workouts
       movesTo.forEach(m => {
@@ -544,6 +566,7 @@ function resetDay(id, e) {
   Object.keys(d).forEach(k => {
     if (k.startsWith('move_to_' + id + '_from_') || k.startsWith('move_status_' + id + '_from_')) delete d[k];
     if (k === 'move_from_' + id) delete d[k];
+    if (k === 'move_replace_' + id) delete d[k];
   });
   save(d); render();
 }
@@ -671,8 +694,17 @@ function findCellAtPoint(x, y) {
 
 function doMove(fromId, toId) {
   const d = load();
-  d['move_from_' + fromId] = toId;
-  d['move_to_' + toId + '_from_' + fromId] = true;
+  const toDay = PLAN.find(p => p.id === toId);
+  if (toDay && toDay.hikeRest) {
+    // Overwrite hike/rest day — store as a replace, not an append
+    d['move_from_' + fromId] = toId;
+    d['move_replace_' + toId] = fromId;
+    // Clear any existing hike/rest status for that day
+    delete d[toId];
+  } else {
+    d['move_from_' + fromId] = toId;
+    d['move_to_' + toId + '_from_' + fromId] = true;
+  }
   save(d); render();
 }
 
