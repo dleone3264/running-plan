@@ -125,6 +125,14 @@
   <h1>Running plan — June 22 to August 7, 2026</h1>
   <p class="subtitle">7-week maintenance plan · Tuesdays &amp; Fridays · Strength on Mondays &amp; Thursdays · Yoga on Wednesdays</p>
   <button class="clear-btn" onclick="clearAllMoves()">↺ Clear all moved workouts</button>
+  <button class="clear-btn" onclick="exportProgress()" style="margin-left:6px;">↑ Export progress</button>
+
+  <div id="export-box" style="display:none;margin-bottom:1rem;">
+    <div style="font-size:12px;color:#5f5e5a;margin-bottom:6px;">Copy this and paste it into your conversation with Claude:</div>
+    <textarea id="export-text" style="width:100%;height:120px;font-size:11px;font-family:monospace;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px;padding:8px;resize:none;background:#f8f7f4;" readonly></textarea>
+    <button class="clear-btn" onclick="copyExport()" style="margin-top:6px;">Copy to clipboard</button>
+    <span id="copy-confirm" style="font-size:11px;color:#90B870;margin-left:8px;display:none;">Copied!</span>
+  </div>
 
   <div class="section-title">Treadmill pace reference (based on 34:40 5k)</div>
   <div class="pace-grid">
@@ -269,6 +277,60 @@ function clearAllMoves() {
   Object.keys(d).forEach(k => { if (k.startsWith('move_')) delete d[k]; });
   save(d);
   location.reload();
+}
+
+function exportProgress() {
+  const d = load();
+  const box = document.getElementById('export-box');
+  const txt = document.getElementById('export-text');
+
+  // Build a human-readable summary
+  const lines = ['RUNNING PLAN PROGRESS EXPORT', '================================'];
+  PLAN.forEach(day => {
+    const state = d[day.id] || {};
+    const replaceFrom = d['move_replace_' + day.id];
+    const movedFrom = d['move_from_' + day.id];
+    const movesTo = Object.keys(d).filter(k => k.startsWith('move_to_' + day.id + '_from_')).map(k => k.replace('move_to_' + day.id + '_from_', ''));
+
+    const parts = [];
+    if (movedFrom) parts.push('MOVED → ' + movedFrom);
+    if (replaceFrom) parts.push('REPLACED BY workout from ' + replaceFrom);
+    if (state.status) parts.push('Status: ' + state.status.toUpperCase());
+    if (state.rating) parts.push('Rating: ' + state.rating);
+    movesTo.forEach(fromId => {
+      const ms = d['move_status_' + day.id + '_from_' + fromId] || {};
+      const fromDay = PLAN.find(p => p.id === fromId);
+      const fromLabel = fromDay ? fromDay.dow + ' ' + fromDay.date : fromId;
+      let moveInfo = 'RECEIVED workout from ' + fromLabel;
+      if (ms.status) moveInfo += ' — Status: ' + ms.status.toUpperCase();
+      if (ms.rating) moveInfo += ' Rating: ' + ms.rating;
+      parts.push(moveInfo);
+    });
+
+    if (parts.length > 0) {
+      const dayLabel = day.dow + ' ' + day.label + (day.hikeRest ? ' (Hike/Rest)' : day.workouts ? ' (' + day.workouts.map(w => w.lines[0]).join(', ') + ')' : '');
+      lines.push('');
+      lines.push(dayLabel);
+      parts.forEach(p => lines.push('  ' + p));
+    }
+  });
+
+  if (lines.length === 2) {
+    lines.push('');
+    lines.push('No progress logged yet.');
+  }
+
+  txt.value = lines.join('\n');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function copyExport() {
+  const txt = document.getElementById('export-text');
+  txt.select();
+  document.execCommand('copy');
+  const confirm = document.getElementById('copy-confirm');
+  confirm.style.display = 'inline';
+  setTimeout(() => confirm.style.display = 'none', 2000);
 }
 
 // ── Pill HTML ─────────────────────────────────────────────
