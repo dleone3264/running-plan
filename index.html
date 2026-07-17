@@ -394,18 +394,19 @@ function desktopControls(id, state, hikeRest, isMoved) {
   const status = state.status || '';
   const rating = state.rating || '';
   const selCls = status ? ` is-${status}` : '';
-  if (status && (hikeRest || rating)) {
+  const showRating = !hikeRest && status !== 'skipped';
+  if (status && (hikeRest || rating || status === 'skipped')) {
     const label = status === 'done' ? '✅' : status === 'skipped' ? '❌' : status === 'hike' ? '🥾' : status === 'rest' ? '💤' : '';
     const emoji = [label, rating].filter(Boolean).join(' ');
     return `<div class="done-summary" style="display:block;" onclick="showControls('${id}')"><span style="font-size:18px;">${emoji}</span><span class="edit-lbl">· edit</span></div>
     <div class="workout-controls" style="display:none;" id="ctrl-${id}">
       <select class="status-select${selCls}" onchange="setStatus('${id}',this.value)">${statusOptions(hikeRest)}</select>
-      ${!hikeRest ? `<select class="rating-select" onchange="rate('${id}',this.value)">${ratingOptions()}</select>` : ''}
+      ${showRating ? `<select class="rating-select" onchange="rate('${id}',this.value)">${ratingOptions()}</select>` : ''}
     </div>`;
   }
   return `<div class="workout-controls" id="ctrl-${id}">
     <select class="status-select${selCls}" onchange="setStatus('${id}',this.value)">${statusOptions(hikeRest)}</select>
-    ${!hikeRest ? `<select class="rating-select" onchange="rate('${id}',this.value)">${ratingOptions()}</select>` : ''}
+    ${showRating ? `<select class="rating-select" onchange="rate('${id}',this.value)">${ratingOptions()}</select>` : ''}
   </div>`;
 }
 
@@ -413,18 +414,18 @@ function desktopMovedControls(toId, fromId, ms) {
   const status = ms.status || '';
   const rating = ms.rating || '';
   const selCls = status ? ` is-${status}` : '';
-  const key = `move_status_${toId}_from_${fromId}`;
-  if (status && rating) {
+  const showRating = status !== 'skipped';
+  if (status && (rating || status === 'skipped')) {
     const label = status === 'done' ? '✅' : status === 'skipped' ? '❌' : '';
     return `<div class="done-summary" style="display:block;" onclick="showMovedControls('${toId}','${fromId}')"><span style="font-size:18px;">${label} ${rating}</span><span class="edit-lbl">· edit</span></div>
     <div class="workout-controls" style="display:none;" id="mctrl-${toId}-${fromId}">
       <select class="status-select${selCls}" onchange="setMovedStatus('${toId}','${fromId}',this.value)">${statusOptions(false)}</select>
-      <select class="rating-select" onchange="setMovedRating('${toId}','${fromId}',this.value)">${ratingOptions()}</select>
+      ${showRating ? `<select class="rating-select" onchange="setMovedRating('${toId}','${fromId}',this.value)">${ratingOptions()}</select>` : ''}
     </div>`;
   }
   return `<div class="workout-controls" id="mctrl-${toId}-${fromId}">
     <select class="status-select${selCls}" onchange="setMovedStatus('${toId}','${fromId}',this.value)">${statusOptions(false)}</select>
-    <select class="rating-select" onchange="setMovedRating('${toId}','${fromId}',this.value)">${ratingOptions()}</select>
+    ${showRating ? `<select class="rating-select" onchange="setMovedRating('${toId}','${fromId}',this.value)">${ratingOptions()}</select>` : ''}
   </div>`;
 }
 
