@@ -758,13 +758,15 @@ function findCellAtPoint(x, y) {
 function doMove(fromId, toId) {
   const d = load();
   const toDay = PLAN.find(p => p.id === toId);
-  if (toDay && toDay.hikeRest) {
-    // Overwrite hike/rest day — store as a replace, not an append
+  const alreadyReplaced = !!d['move_replace_' + toId];
+
+  if (toDay && toDay.hikeRest && !alreadyReplaced) {
+    // First move onto a hike/rest day — replace it
     d['move_from_' + fromId] = toId;
     d['move_replace_' + toId] = fromId;
-    // Clear any existing hike/rest status for that day
     delete d[toId];
   } else {
+    // Regular day, or hike/rest already replaced — append as second workout
     d['move_from_' + fromId] = toId;
     d['move_to_' + toId + '_from_' + fromId] = true;
   }
