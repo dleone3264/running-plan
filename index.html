@@ -124,6 +124,16 @@
 <div class="container">
   <h1>Running plan — June 22 to August 7, 2026</h1>
   <p class="subtitle">7-week maintenance plan · Tuesdays &amp; Fridays · Strength on Mondays &amp; Thursdays · Yoga on Wednesdays</p>
+
+  <div id="progress-tracker" style="margin-bottom:1.25rem;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+      <span id="tracker-label" style="font-size:13px;color:#888780;">0 of 35 workouts complete</span>
+      <span id="tracker-pct" style="font-size:13px;color:#90B870;">0%</span>
+    </div>
+    <div style="background:#f0efe8;border-radius:99px;height:6px;">
+      <div id="tracker-bar" style="background:#90B870;height:6px;border-radius:99px;width:0%;transition:width 0.4s ease;"></div>
+    </div>
+  </div>
   <button class="clear-btn" onclick="clearAllMoves()">↺ Clear all moved workouts</button>
   <button class="clear-btn" onclick="exportProgress()" style="margin-left:6px;">↑ Export progress</button>
 
@@ -367,6 +377,45 @@ function render() {
   const d = load();
   renderDesktop(d);
   renderMobile(d);
+  updateTracker(d);
+}
+
+function updateTracker(d) {
+  const TOTAL = 35;
+  let completed = 0;
+
+  PLAN.forEach(day => {
+    if (day.dow === 'Sat' || day.dow === 'Sun') return; // weekdays only
+    const state = d[day.id] || {};
+    const movedFrom = d['move_from_' + day.id];
+
+    // Original workout on this day counts if done (and not moved away)
+    if (!movedFrom && state.status === 'done') completed++;
+
+    // Moved workouts received by this day — count if marked done
+    const movesTo = Object.keys(d).filter(k => k.startsWith('move_to_' + day.id + '_from_'));
+    movesTo.forEach(k => {
+      const fromId = k.replace('move_to_' + day.id + '_from_', '');
+      const fromDay = PLAN.find(p => p.id === fromId);
+      if (!fromDay || fromDay.dow === 'Sat' || fromDay.dow === 'Sun') return;
+      const ms = d['move_status_' + day.id + '_from_' + fromId] || {};
+      if (ms.status === 'done') completed++;
+    });
+
+    // Replace moves (workout moved onto a hike/rest day)
+    const replaceFrom = d['move_replace_' + day.id];
+    if (replaceFrom) {
+      const fromDay = PLAN.find(p => p.id === replaceFrom);
+      if (fromDay && fromDay.dow !== 'Sat' && fromDay.dow !== 'Sun') {
+        if (state.status === 'done') completed++;
+      }
+    }
+  });
+
+  const pct = Math.round((completed / TOTAL) * 100);
+  document.getElementById('tracker-label').textContent = completed + ' of ' + TOTAL + ' workouts complete';
+  document.getElementById('tracker-bar').style.width = pct + '%';
+  document.getElementById('tracker-pct').textContent = pct + '%';
 }
 
 function getDayState(id, d) {
