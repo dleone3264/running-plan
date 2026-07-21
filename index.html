@@ -381,34 +381,37 @@ function render() {
 }
 
 function updateTracker(d) {
-  const TOTAL = 35;
-  const weekdayIds = PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').map(p => p.id);
-
+  let total = 35;
   let completed = 0;
+
+  // Count weekday completions
+  const weekdayIds = PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').map(p => p.id);
   weekdayIds.forEach(id => {
     const movedTo = d['move_from_' + id];
-
     if (!movedTo) {
-      // Stayed on original day
       const state = d[id] || {};
       if (state.status === 'done') completed++;
     } else {
-      // Was moved — find its status on the new day
       const replaceFrom = d['move_replace_' + movedTo];
       if (replaceFrom === id) {
-        // This workout replaced a hike/rest day — status is on the day itself
         const state = d[movedTo] || {};
         if (state.status === 'done') completed++;
       } else {
-        // Appended onto another day (regular or already-replaced hike/rest)
         const ms = d['move_status_' + movedTo + '_from_' + id] || {};
         if (ms.status === 'done') completed++;
       }
     }
   });
 
-  const pct = Math.round((completed / TOTAL) * 100);
-  document.getElementById('tracker-label').textContent = completed + ' of ' + TOTAL + ' workouts complete';
+  // Add weekend hikes to both total and completed
+  const weekendIds = PLAN.filter(p => p.dow === 'Sat' || p.dow === 'Sun').map(p => p.id);
+  weekendIds.forEach(id => {
+    const state = d[id] || {};
+    if (state.status === 'hike') { total++; completed++; }
+  });
+
+  const pct = Math.round((completed / total) * 100);
+  document.getElementById('tracker-label').textContent = completed + ' of ' + total + ' workouts complete';
   document.getElementById('tracker-bar').style.width = pct + '%';
   document.getElementById('tracker-pct').textContent = pct + '%';
 }
