@@ -382,32 +382,27 @@ function render() {
 
 function updateTracker(d) {
   const TOTAL = 35;
+  const weekdayIds = PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').map(p => p.id);
+
   let completed = 0;
+  weekdayIds.forEach(id => {
+    const movedTo = d['move_from_' + id];
 
-  PLAN.forEach(day => {
-    if (day.dow === 'Sat' || day.dow === 'Sun') return; // weekdays only
-    const state = d[day.id] || {};
-    const movedFrom = d['move_from_' + day.id];
-
-    // Original workout on this day counts if done (and not moved away)
-    if (!movedFrom && state.status === 'done') completed++;
-
-    // Moved workouts received by this day — count if marked done
-    const movesTo = Object.keys(d).filter(k => k.startsWith('move_to_' + day.id + '_from_'));
-    movesTo.forEach(k => {
-      const fromId = k.replace('move_to_' + day.id + '_from_', '');
-      const fromDay = PLAN.find(p => p.id === fromId);
-      if (!fromDay || fromDay.dow === 'Sat' || fromDay.dow === 'Sun') return;
-      const ms = d['move_status_' + day.id + '_from_' + fromId] || {};
-      if (ms.status === 'done') completed++;
-    });
-
-    // Replace moves (workout moved onto a hike/rest day)
-    const replaceFrom = d['move_replace_' + day.id];
-    if (replaceFrom) {
-      const fromDay = PLAN.find(p => p.id === replaceFrom);
-      if (fromDay && fromDay.dow !== 'Sat' && fromDay.dow !== 'Sun') {
+    if (!movedTo) {
+      // Stayed on original day
+      const state = d[id] || {};
+      if (state.status === 'done') completed++;
+    } else {
+      // Was moved — find its status on the new day
+      const replaceFrom = d['move_replace_' + movedTo];
+      if (replaceFrom === id) {
+        // This workout replaced a hike/rest day — status is on the day itself
+        const state = d[movedTo] || {};
         if (state.status === 'done') completed++;
+      } else {
+        // Appended onto another day (regular or already-replaced hike/rest)
+        const ms = d['move_status_' + movedTo + '_from_' + id] || {};
+        if (ms.status === 'done') completed++;
       }
     }
   });
