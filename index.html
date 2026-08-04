@@ -752,7 +752,9 @@ function saveMove(fromId) {
     const label = fromDay && fromDay.workouts ? fromDay.workouts[0].lines[0] : 'Workout';
     const cls = fromDay && fromDay.workouts ? fromDay.workouts[0].cls : 'ev-run';
     const total = fromDay && fromDay.workouts ? (fromDay.workouts[0].total || '') : '';
-    d['extra_' + toId].push({ fromId, label, cls, total, replacesHikeRest: isHikeRestDay });
+    // Only the first workout moved to a hike/rest day replaces it; others append
+    const alreadyReplaced = d['extra_' + toId].some(e => e.replacesHikeRest);
+    d['extra_' + toId].push({ fromId, label, cls, total, replacesHikeRest: isHikeRestDay && !alreadyReplaced });
   }
 
   // If replacing a hike/rest day, clear any existing hike/rest status
