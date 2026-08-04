@@ -1166,14 +1166,20 @@ function checkPillOverflow() {
 }
 
 function updateTracker(d) {
-  let total = 75;
+  const today = new Date();
+  const todayDate = new Date(2026, today.getMonth(), today.getDate());
+
+  let total = 0;
   let completed = 0;
 
-  // Count weekday completions (skip moved-away workouts, they count on new day)
+  // Count weekday workouts up to and including today
   PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').forEach(day => {
+    const dayDate = planDateFor(day);
+    if (!dayDate || dayDate > todayDate) return;
+    total++;
     const state = d[day.id] || {};
     if (state.status === 'done') completed++;
-    // Count extra workouts received on this day
+    // Count extra workouts received on this day that are marked done
     const extras = d['extra_' + day.id] || [];
     extras.forEach(ex => {
       const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
@@ -1181,13 +1187,15 @@ function updateTracker(d) {
     });
   });
 
-  // Add weekend hikes to both total and completed
+  // Add weekend hikes to both total and completed (only up to today)
   PLAN.filter(p => p.dow === 'Sat' || p.dow === 'Sun').forEach(day => {
+    const dayDate = planDateFor(day);
+    if (!dayDate || dayDate > todayDate) return;
     const state = d[day.id] || {};
     if (state.status === 'hike') { total++; completed++; }
   });
 
-  const pct = Math.round((completed / total) * 100);
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   document.getElementById('tracker-label').textContent = completed + ' of ' + total + ' workouts complete';
   document.getElementById('tracker-bar').style.width = pct + '%';
   document.getElementById('tracker-pct').textContent = pct + '%';
