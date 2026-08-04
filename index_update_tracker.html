@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workout Calendar 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #f5f4f0; color: #111110; padding: 1.5rem 1rem; line-height: 1.6; letter-spacing: -0.03em; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 20px; font-weight: 500; margin-bottom: 0.2rem; }
+    .subtitle { font-size: 13px; color: #5f5e5a; margin-bottom: 0.5rem; }
+    .clear-btn { font-size: 11px; color: #aaa; background: none; border: 0.5px solid #ddd; border-radius: 4px; padding: 3px 8px; cursor: pointer; margin-bottom: 1.5rem; display: inline-block; }
+    .section-title { font-size: 14px; font-weight: 500; margin-bottom: 10px; color: #1a1a18; }
+    .pace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 1.5rem; }
+    .pace-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 8px; padding: 10px 12px; }
+    .pace-label { font-size: 11px; color: #888780; margin-bottom: 2px; }
+    .pace-val { font-size: 14px; font-weight: 500; color: #1a1a18; }
+    .pace-sub { font-size: 11px; color: #5f5e5a; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #5f5e5a; }
+    .leg-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+
+    /* Event pill colors */
+    .ev-strength { background: #7A98A8; color: #fff; border: 1px solid #5A7888; }
+    .ev-run      { background: #C8785A; color: #fff; border: 1px solid #A05840; }
+    .ev-yoga     { background: #C8A85A; color: #fff; border: 1px solid #A08038; }
+    .ev-hike     { background: #6A9878; color: #fff; border: 1px solid #4A7858; }
+    .ev-walk     { background: #C8A85A; color: #fff; border: 1px solid #A08038; }
+
+    /* Calendar */
+    .cal-month { margin-bottom: 2rem; }
+    .cal-month-label { font-size: 14px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.03em; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .cal-dow { font-size: 11px; color: #3A3A38; text-align: center; padding: 3px 0 5px; font-weight: 500; }
+    .cal-day { border-radius: 7px; padding: 5px 6px; min-height: 90px; border: 0.5px solid rgba(0,0,0,0.11); background: #fff; position: relative; transition: background 0.2s, border-color 0.2s; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+    .cal-day.empty { background: transparent; border-color: transparent; }
+    .cal-date { font-size: 10px; color: #111110; margin-bottom: 3px; }
+    .cal-event { font-size: 10px; border-radius: 3px; padding: 2px 4px; margin-bottom: 2px; line-height: 1.3; display: block; font-weight: 500; }
+    .cal-total { font-size: 10px; font-weight: 500; color: #444440; margin-top: 3px; }
+
+    /* Status shading */
+    .cal-day.status-done    { background: #E8EDE0; border-color: #A8BF90; }
+    .cal-day.status-skipped { background: #EDE0DC; border-color: #C0A098; }
+    .cal-day.status-hike    { background: #E8EDE0; border-color: #A8BF90; }
+    .cal-day.status-rest    { background: #E0E4E8; border-color: #A0AABB; }
+    .cal-day.status-moved   { background: #E0E4E8; border-color: #A0AABB; }
+    .week-row.status-moved  { background: #E0E4E8; }
+    /* Hide seg-toggle when status is set — workout pills stay visible */
+    .cal-day.status-done .seg-wrap,
+    .cal-day.status-skipped .seg-wrap,
+    .cal-day.status-hike .seg-wrap,
+    .cal-day.status-rest .seg-wrap,
+    .cal-day.status-moved .seg-wrap { display: none; }
+    .css-moved { display:inline-block; font-size:11px; color:#8AAABB; vertical-align:middle; line-height:1; }
+    .moved-pill { font-size:10px; color:#8AAABB; margin-top:3px; display:block; }
+    /* Race clock */
+    .race-clock { background: #1a1a18; border-radius: 5px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; margin-top: 4px; cursor: pointer; }
+    .race-clock-label { font-size: 8px; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+    .race-clock-time { font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #C8785A; letter-spacing: 0.05em; line-height: 1; }
+    .race-clock-input { background: transparent; border: none; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #C8785A; text-align: center; width: 80px; outline: none; letter-spacing: 0.05em; }
+    .race-clock-input::placeholder { color: #555; }
+    .race-clock-save { font-size: 9px; color: #C8785A; background: none; border: 0.5px solid #555; border-radius: 3px; padding: 2px 6px; cursor: pointer; margin-top: 4px; }
+    .pill-editor { background: #fff; border: 1px solid #B0A898; border-radius: 5px; padding: 5px 6px; margin-bottom: 3px; display: flex; flex-direction: column; gap: 4px; }
+    .pill-editor input, .pill-editor textarea { font-family: 'Poppins', sans-serif; font-size: 11px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 3px; padding: 3px 5px; width: 100%; color: #111110; background: #faf9f6; resize: none; }
+    .pill-editor textarea { height: 44px; }
+    .pill-editor-label { font-size: 10px; color: #888780; margin-bottom: 1px; }
+    .pill-editor-btns { display: flex; gap: 5px; margin-top: 2px; }
+    .pill-editor-btn { font-size: 10px; border-radius: 3px; padding: 2px 8px; cursor: pointer; border: 0.5px solid; }
+    .pill-editor-save { background: #D8ECC8; color: #2A5010; border-color: #90B870; }
+    .pill-editor-cancel { background: #f5f4f0; color: #5f5e5a; border-color: #ccc; }
+    .cal-event[data-editable]:hover { cursor: pointer; opacity: 0.85; }
+
+    /* Controls — segmented pill */
+    .seg-wrap { margin-top: 5px; }
+    .seg-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 5px; }
+    .seg-btn { cursor: pointer; color: #ccc; transition: color 0.15s; user-select: none; -webkit-user-select: none; background: none; border: none; padding: 0; font-size: 12px; line-height: 1; }
+    .css-done { display:inline-block; width:9px; height:9px; border-radius:50%; background:#A8BF90; vertical-align:middle; transition:opacity 0.15s; }
+    .css-skip { display:inline-block; position:relative; width:9px; height:9px; vertical-align:middle; }
+    .css-skip::before, .css-skip::after { content:''; position:absolute; width:9px; height:1.5px; background:#C0A098; top:50%; left:0; border-radius:1px; transition:opacity 0.15s; }
+    .css-skip::before { transform:rotate(45deg); }
+    .css-skip::after { transform:rotate(-45deg); }
+    .css-hike { display:inline-block; width:9px; height:9px; border-radius:50%; background:#A8BF90; vertical-align:middle; transition:opacity 0.15s; }
+    .css-rest { display:inline-block; width:9px; height:9px; border-radius:50%; background:#8AAABB; vertical-align:middle; transition:opacity 0.15s; }
+    .seg-btn:not(.active-hike) .css-hike { opacity:0.9; }
+    .seg-btn:not(.active-rest) .css-rest { opacity:0.9; }
+    .seg-btn.active-hike .css-hike { opacity:1; }
+    .seg-btn.active-rest .css-rest { opacity:1; }
+    .week-seg-btn .css-hike, .week-seg-btn .css-rest { width:11px; height:11px; }
+    .css-skip-lg { width:14px !important; height:14px !important; opacity:1 !important; }
+    .css-skip-lg::before, .css-skip-lg::after { width:14px !important; }
+    .seg-btn:not(.active-done) .css-done { opacity:0.9; }
+    .seg-btn:not(.active-skip) .css-skip::before, .seg-btn:not(.active-skip) .css-skip::after { opacity:0.9; }
+    .seg-btn.active-done .css-done { opacity:1; }
+    .seg-btn.active-skip .css-skip::before, .seg-btn.active-skip .css-skip::after { opacity:1; }
+    .week-seg-btn:not(.active-done) .css-done { opacity:0.75; }
+    .week-seg-btn:not(.active-skip) .css-skip::before, .week-seg-btn:not(.active-skip) .css-skip::after { opacity:0.75; }
+    .week-seg-btn.active-done .css-done { opacity:1; }
+    .week-seg-btn.active-skip .css-skip::before, .week-seg-btn.active-skip .css-skip::after { opacity:1; }
+    .seg-btn.active-done  { color: #A8BF90; }
+    .seg-btn.active-skip  { color: #C0A098; }
+    .seg-btn.active-hike  { color: #A8BF90; }
+    .seg-btn.active-rest  { color: #A0AABB; }
+    .seg-btn.active-moved { color: #8AAABB; }
+    .seg-divider { width: 1px; height: 12px; background: #ddd; flex-shrink: 0; }
+
+    .done-summary { margin-top: 6px; cursor: pointer; display: none; text-align: center; width: 100%; line-height: 1; padding: 4px 0; }
+    .reset-btn { position: absolute; top: 4px; right: 4px; font-size: 14px; color: #bbb; cursor: pointer; background: none; border: none; padding: 0; line-height: 1; display: none; }
+    .cal-day:hover .reset-btn { display: block; }
+    .reset-btn:hover { color: #888; }
+
+    /* Mobile */
+    .week-seg-toggle { display: flex; gap: 8px; font-size: 14px; margin-top: 5px; }
+    .week-seg-btn { cursor: pointer; color: #ccc; background: none; border: none; padding: 0; font-size: 18px; line-height: 1; user-select: none; -webkit-user-select: none; transition: color 0.15s; }
+    .week-seg-btn.active-done { color: #A8BF90; }
+    .week-seg-btn.active-skip { color: #C0A098; }
+    .week-seg-btn.active-hike { color: #A8BF90; }
+    .week-seg-btn.active-rest { color: #A0AABB; }
+
+
+
+    /* Mobile week list */
+    .week-list { display: none; }
+    .week-block { background: #fff; border: 0.5px solid rgba(0,0,0,0.11); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .week-header { background: #f1efe8; padding: 8px 12px; font-size: 12px; font-weight: 500; color: #5f5e5a; }
+    .week-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border-top: 0.5px solid rgba(0,0,0,0.07); transition: background 0.2s; }
+    .week-row.status-done    { background: #E8EDE0; }
+    .week-row.status-skipped { background: #EDE0DC; }
+    .week-row.status-hike    { background: #E8EDE0; }
+    .week-row.status-rest    { background: #E0E4E8; }
+
+    .week-dow { font-size: 12px; font-weight: 500; color: #888780; width: 28px; flex-shrink: 0; padding-top: 3px; }
+    .week-date { font-size: 11px; color: #888780; width: 20px; flex-shrink: 0; padding-top: 4px; }
+    .week-events { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .week-pill { display: inline-block; font-size: 12px; border-radius: 4px; padding: 3px 7px; line-height: 1.35; font-weight: 500; }
+    .week-total { font-size: 11px; color: #444440; font-weight: 500; margin-top: 2px; }
+    .week-controls { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+
+    @media (max-width: 600px) {
+      .cal-grid-wrap { display: none; }
+      .week-list { display: block; }
+      h1 { font-size: 18px; }
+    }
+
+    .divider { border: none; border-top: 0.5px solid rgba(0,0,0,0.11); margin: 1.75rem 0; }
+    .explainers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .ex-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 1rem 1.25rem; }
+    .ex-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ex-badge { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+    .ex-title { font-size: 15px; font-weight: 500; color: #1a1a18; }
+    .ex-row { font-size: 13px; color: #5f5e5a; padding: 6px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); line-height: 1.5; }
+    .ex-row:last-child { border-bottom: none; }
+    .ex-label { font-weight: 500; color: #1a1a18; display: block; margin-bottom: 2px; }
+
+
+
+    @media print {
+      body { background: #fff; padding: 1rem; }
+      .cal-day, .cal-event, .week-pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .cal-day { break-inside: avoid; }
+      .cal-month { break-inside: avoid; }
+      .week-block { break-inside: avoid; }
+      .workout-controls, .week-controls, .reset-btn, .clear-btn { display: none !important; }
+      .pace-grid, .section-title, .divider, .explainers, .legend { display: none; }
+      .subtitle { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Workout Calendar 2026</h1>
+
+  <div id="progress-tracker" style="margin-bottom:1.25rem;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+      <span id="tracker-label" style="font-size:13px;color:#888780;">0 of 35 workouts complete</span>
+      <span id="tracker-pct" style="font-size:13px;color:#90B870;">0%</span>
+    </div>
+    <div style="background:#f0efe8;border-radius:99px;height:6px;">
+      <div id="tracker-bar" style="background:#90B870;height:6px;border-radius:99px;width:0%;transition:width 0.4s ease;"></div>
+    </div>
+  </div>
+  <button class="clear-btn" onclick="exportProgress()">↑ Export progress</button>
+
+  <div id="export-box" style="display:none;margin-bottom:1rem;">
+    <div style="font-size:12px;color:#5f5e5a;margin-bottom:6px;">Copy this and paste it into your conversation with Claude:</div>
+    <textarea id="export-text" style="width:100%;height:120px;font-size:11px;font-family:monospace;border:0.5px solid rgba(0,0,0,0.2);border-radius:6px;padding:8px;resize:none;background:#f8f7f4;" readonly></textarea>
+    <button class="clear-btn" onclick="copyExport()" style="margin-top:6px;">Copy to clipboard</button>
+    <span id="copy-confirm" style="font-size:11px;color:#90B870;margin-left:8px;display:none;">Copied!</span>
+  </div>
+
+  <div class="section-title" style="display:none;">Treadmill pace reference (based on 34:40 5k)</div>
+  <div class="pace-grid" style="display:none;">
+    <div class="pace-card"><div class="pace-label">Easy / recovery</div><div class="pace-val">12:00–13:20 /mi</div><div class="pace-sub">4.5–5.0 mph · 1% incline</div></div>
+    <div class="pace-card"><div class="pace-label">Strides</div><div class="pace-val">9:40–10:20 /mi</div><div class="pace-sub">5.8–6.2 mph · 20 sec on · 90 sec walk</div></div>
+    <div class="pace-card"><div class="pace-label">Hill repeats</div><div class="pace-val">12:00–12:30 /mi</div><div class="pace-sub">4.8–5.0 mph · 6% → 8% incline</div></div>
+    <div class="pace-card"><div class="pace-label">Tempo</div><div class="pace-val">10:42–11:19 /mi</div><div class="pace-sub">5.3–5.6 mph · 1% incline</div></div>
+  </div>
+
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#7A98A8;border:1px solid #5A7888;"></span>Strength</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#C8785A;border:1px solid #A05840;"></span>Run</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#C8A85A;border:1px solid #A08038;"></span>Walk, Yoga, Mobility</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#6A9878;border:1px solid #4A7858;"></span>Hike, Rest</span>
+  </div>
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#E8EDE0;border:1px solid #A8BF90;"></span>Done</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#EDE0DC;border:1px solid #C0A098;"></span>Skipped</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#E0E4E8;border:1px solid #A0AABB;"></span>Rested</span>
+  </div>
+
+  <div class="cal-grid-wrap" id="desktop-cal"></div>
+  <div class="week-list" id="mobile-cal"></div>
+
+  <hr class="divider" style="display:none;" />
+  <div class="section-title" style="display:none;margin-bottom:1rem;">Workout guide</div>
+  <div class="explainers" style="display:none;">
+    <div class="ex-card">
+      <div class="ex-header"><div class="ex-badge" style="background:#E6F1FB;">⚡</div><span class="ex-title">Strides</span></div>
+      <div class="ex-row"><span class="ex-label">What they are</span>Short controlled accelerations done after your easy run, not during it.</div>
+      <div class="ex-row"><span class="ex-label">How to run them</span>Build to ~85–90% max speed over 5 sec, hold for 10 sec, ease off over 5 sec. Smooth, not sprinting.</div>
+      <div class="ex-row"><span class="ex-label">Recovery</span>60–90 sec walk or very easy jog between each rep.</div>
+      <div class="ex-row"><span class="ex-label">Treadmill tip</span>Start pressing the speed up a few seconds early. 5.8–6.2 mph (9:40–10:20 /mi) for the stride portion.</div>
+      <div class="ex-row"><span class="ex-label">Why they work</span>Wake up fast-twitch muscle fibers and reinforce good form with almost no fatigue cost.</div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-header"><div class="ex-badge" style="background:#FAEEDA;">&#x2197;</div><span class="ex-title">Hill repeats</span></div>
+      <div class="ex-row"><span class="ex-label">Structure</span>8 min warm-up → 4–6 reps uphill → 5 min cool-down.</div>
+      <div class="ex-row"><span class="ex-label">How to run them</span>Strong, controlled effort at ~80–85% max. Each rep lasts 45–60 sec. Eyes up, slight forward lean from ankles, drive your arms.</div>
+      <div class="ex-row"><span class="ex-label">Recovery</span>Drop incline to 0% and walk 90 sec between reps. Don't rush it.</div>
+      <div class="ex-row"><span class="ex-label">Treadmill settings</span>4.8–5.0 mph (12:00–12:30 /mi) at 6% (wks 1–2) building to 8% (wks 5–6).</div>
+      <div class="ex-row"><span class="ex-label">Why they work</span>Mimics hiking mechanics closely and builds leg strength without the pounding of flat speedwork.</div>
+    </div>
+    <div class="ex-card">
+      <div class="ex-header"><div class="ex-badge" style="background:#EEEDFE;">&#x23F1;</div><span class="ex-title">Tempo runs</span></div>
+      <div class="ex-row"><span class="ex-label">Structure</span>10 min warm-up → 10–15 min tempo block → 5 min cool-down.</div>
+      <div class="ex-row"><span class="ex-label">How to run them</span>"Comfortably hard" — you can speak 3–4 words but not hold a conversation. Steady effort throughout, not a progression.</div>
+      <div class="ex-row"><span class="ex-label">Treadmill settings</span>5.3–5.6 mph (10:42–11:19 /mi) at 1% incline. Start at 5.1 mph if that feels too aggressive.</div>
+      <div class="ex-row"><span class="ex-label">Warm-up and cool-down</span>Both at 4.5 mph (13:20 /mi), 1% incline. Genuinely easy — not just slightly slower than tempo.</div>
+      <div class="ex-row"><span class="ex-label">Why they work</span>Trains your lactate threshold — the pace you can sustain for longer efforts — with a short enough block to avoid digging into recovery.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Plan data ─────────────────────────────────────────────
+// Each day: { id, date, dow, label, workouts: [{cls, lines, total}], hikeRest }
+// workouts is an array so multi-workout days are native
+const PLAN = [
+  // WEEK 1
+  { id:'jun22', date:'22', dow:'Mon', label:'22', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jun23', date:'23', dow:'Tue', label:'23', workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'jun24', date:'24', dow:'Wed', label:'24', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jun25', date:'25', dow:'Thu', label:'25', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jun26', date:'26', dow:'Fri', label:'26', workouts:[{cls:'ev-run', lines:['Hills 4× / 6%'], total:'~25 min'}] },
+  { id:'jun27', date:'27', dow:'Sat', label:'27', hikeRest:true },
+  { id:'jun28', date:'28', dow:'Sun', label:'28', hikeRest:true },
+  // WEEK 2
+  { id:'jun29', date:'29', dow:'Mon', label:'29', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jun30', date:'30', dow:'Tue', label:'30', workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'jul1',  date:'1',  dow:'Wed', label:'1',  workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jul2',  date:'2',  dow:'Thu', label:'2',  workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul3',  date:'3',  dow:'Fri', label:'3',  workouts:[{cls:'ev-run', lines:['Hills 4× / 6%'], total:'~25 min'}] },
+  { id:'jul4',  date:'4',  dow:'Sat', label:'4',  hikeRest:true },
+  { id:'jul5',  date:'5',  dow:'Sun', label:'5',  hikeRest:true },
+  // WEEK 3
+  { id:'jul6',  date:'6',  dow:'Mon', label:'6', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul7',  date:'7',  dow:'Tue', label:'7',  workouts:[{cls:'ev-run', lines:['Easy + Strides 4×'], total:'~25 min'}] },
+  { id:'jul8',  date:'8',  dow:'Wed', label:'8',  workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jul9',  date:'9',  dow:'Thu', label:'9',  workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul10', date:'10', dow:'Fri', label:'10', workouts:[{cls:'ev-run', lines:['Easy run'], total:'40 min'}] },
+  { id:'jul11', date:'11', dow:'Sat', label:'11', hikeRest:true },
+  { id:'jul12', date:'12', dow:'Sun', label:'12', hikeRest:true },
+  // WEEK 4
+  { id:'jul13', date:'13', dow:'Mon', label:'13', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul14', date:'14', dow:'Tue', label:'14', workouts:[{cls:'ev-run', lines:['Easy run'], total:'35 min'}] },
+  { id:'jul15', date:'15', dow:'Wed', label:'15', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jul16', date:'16', dow:'Thu', label:'16', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul17', date:'17', dow:'Fri', label:'17', workouts:[{cls:'ev-run', lines:['Tempo run'], total:'25 min'}] },
+  { id:'jul18', date:'18', dow:'Sat', label:'18', hikeRest:true },
+  { id:'jul19', date:'19', dow:'Sun', label:'19', hikeRest:true },
+  // WEEK 5
+  { id:'jul20', date:'20', dow:'Mon', label:'20', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul21', date:'21', dow:'Tue', label:'21', workouts:[{cls:'ev-run', lines:['Easy run'], total:'25 min'}] },
+  { id:'jul22', date:'22', dow:'Wed', label:'22', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jul23', date:'23', dow:'Thu', label:'23', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul24', vacation:'🏕️', date:'24', dow:'Fri', label:'24', workouts:[{cls:'ev-run', lines:['Easy run'], total:'45 min'}] },
+  { id:'jul25', vacation:'🏕️', date:'25', dow:'Sat', label:'25', hikeRest:true },
+  { id:'jul26', vacation:'🏕️', date:'26', dow:'Sun', label:'26', hikeRest:true },
+  // WEEK 6
+  { id:'jul27', date:'27', dow:'Mon', label:'27', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul28', date:'28', dow:'Tue', label:'28', workouts:[{cls:'ev-run', lines:['Easy + Strides 6×'], total:'~30 min'}] },
+  { id:'jul29', date:'29', dow:'Wed', label:'29', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
+  { id:'jul30', date:'30', dow:'Thu', label:'30', workouts:[{cls:'ev-strength', lines:['Strength']}] },
+  { id:'jul31', date:'31', dow:'Fri', label:'31', workouts:[{cls:'ev-run', lines:['Easy run'], total:'20 min'}] },
+  { id:'aug1',  date:'1',  dow:'Sat', label:'1',  hikeRest:true },
+  { id:'aug2',  date:'2',  dow:'Sun', label:'2 🎉',  workouts:[{cls:'ev-run', lines:['5k Race'], total:'~31–34 min goal'}] },
+  // WEEK 7
+  { id:'aug3',  date:'3',  dow:'Mon', label:'3', hikeRest:true, restOnly:true },
+  { id:'aug4',  date:'4',  dow:'Tue', label:'4',  workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'aug5',  date:'5',  dow:'Wed', label:'5',  workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'aug6',  date:'6',  dow:'Thu', label:'6',  workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'aug7',  date:'7',  dow:'Fri', label:'7',  workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'aug8',  date:'8',  dow:'Sat', label:'8',  hikeRest:true },
+  // Extended plan: Aug 9 – Oct 3
+  { id:'aug9', date:'9', dow:'Sun', label:'9', hikeRest:true },
+  { id:'aug10', date:'10', dow:'Mon', label:'10', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'aug11', date:'11', dow:'Tue', label:'11', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug12', date:'12', dow:'Wed', label:'12', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'aug13', date:'13', dow:'Thu', label:'13', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'aug14', vacation:'🏕️', date:'14', dow:'Fri', label:'14', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug15', vacation:'🏕️', date:'15', dow:'Sat', label:'15', hikeRest:true },
+  { id:'aug16', vacation:'🏕️', date:'16', dow:'Sun', label:'16', hikeRest:true },
+  { id:'aug17', date:'17', dow:'Mon', label:'17', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'aug18', date:'18', dow:'Tue', label:'18', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug19', date:'19', dow:'Wed', label:'19', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'aug20', date:'20', dow:'Thu', label:'20', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'aug21', date:'21', dow:'Fri', label:'21', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug22', date:'22', dow:'Sat', label:'22', hikeRest:true },
+  { id:'aug23', date:'23', dow:'Sun', label:'23', hikeRest:true },
+  { id:'aug24', date:'24', dow:'Mon', label:'24', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'aug25', date:'25', dow:'Tue', label:'25', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug26', date:'26', dow:'Wed', label:'26', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'aug27', vacation:'🏕️', date:'27', dow:'Thu', label:'27', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'aug28', vacation:'🏕️', date:'28', dow:'Fri', label:'28', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug29', vacation:'🏕️', date:'29', dow:'Sat', label:'29', hikeRest:true },
+  { id:'aug30', date:'30', dow:'Sun', label:'30', hikeRest:true },
+  { id:'aug31', date:'31', dow:'Mon', label:'31', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'sep1', date:'1', dow:'Tue', label:'1', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep2', date:'2', dow:'Wed', label:'2', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'sep3', date:'3', dow:'Thu', label:'3', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'sep4', vacation:'🏕️', date:'4', dow:'Fri', label:'4', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep5', vacation:'🏕️', date:'5', dow:'Sat', label:'5', hikeRest:true },
+  { id:'sep6', vacation:'🏕️', date:'6', dow:'Sun', label:'6', hikeRest:true },
+  { id:'sep7', vacation:'🏕️', date:'7', dow:'Mon', label:'7', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'sep8', vacation:'🏕️', date:'8', dow:'Tue', label:'8', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep9', vacation:'🏕️', date:'9', dow:'Wed', label:'9', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'sep10', vacation:'🏕️', date:'10', dow:'Thu', label:'10', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'sep11', vacation:'🏕️', date:'11', dow:'Fri', label:'11', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep12', vacation:'🏕️', date:'12', dow:'Sat', label:'12', hikeRest:true },
+  { id:'sep13', vacation:'🏕️', date:'13', dow:'Sun', label:'13', hikeRest:true },
+  { id:'sep14', date:'14', dow:'Mon', label:'14', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'sep15', date:'15', dow:'Tue', label:'15', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep16', date:'16', dow:'Wed', label:'16', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'sep17', date:'17', dow:'Thu', label:'17', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'sep18', date:'18', dow:'Fri', label:'18', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep19', date:'19', dow:'Sat', label:'19', hikeRest:true },
+  { id:'sep20', date:'20', dow:'Sun', label:'20', hikeRest:true },
+  { id:'sep21', date:'21', dow:'Mon', label:'21', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'sep22', date:'22', dow:'Tue', label:'22', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep23', date:'23', dow:'Wed', label:'23', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'sep24', date:'24', dow:'Thu', label:'24', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'sep25', vacation:'🏕️', date:'25', dow:'Fri', label:'25', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep26', vacation:'🏕️', date:'26', dow:'Sat', label:'26', hikeRest:true },
+  { id:'sep27', vacation:'🏕️', date:'27', dow:'Sun', label:'27', hikeRest:true },
+  { id:'sep28', date:'28', dow:'Mon', label:'28', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
+  { id:'sep29', date:'29', dow:'Tue', label:'29', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep30', date:'30', dow:'Wed', label:'30', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
+  { id:'oct1', date:'1', dow:'Thu', label:'1', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
+  { id:'oct2', date:'2', dow:'Fri', label:'2', hikeRest:true },
+  { id:'oct3', date:'3', dow:'Sat', label:'3 🎉', workouts:[{cls:'ev-run', lines:['5k Race'], total:'~30–32 min goal'}] },
+];
+
+// Month layout: which slots are empty before first day, and which month
+const MONTHS = [
+  { label:'June 2026', days: ['empty', ...PLAN.slice(0,9)] },
+  { label:'July 2026', days: ['empty','empty','empty', ...PLAN.slice(9,40)] },
+  { label:'August 2026', days: ['empty','empty','empty','empty','empty','empty', ...PLAN.slice(40,71)] },
+  { label:'September 2026', days: ['empty','empty', ...PLAN.slice(71,101)] },
+  { label:'October 2026', days: ['empty','empty','empty','empty', ...PLAN.slice(101)] },
+];
+
+const WEEKS = [
+  { label:'Week 1 · Jun 22–28', days: PLAN.slice(0,7) },
+  { label:'Week 2 · Jun 29–Jul 5', days: PLAN.slice(7,14) },
+  { label:'Week 3 · Jul 6–12', days: PLAN.slice(14,21) },
+  { label:'Week 4 · Jul 13–19', days: PLAN.slice(21,28) },
+  { label:'Week 5 · Jul 20–26', days: PLAN.slice(28,35) },
+  { label:'Week 6 · Jul 27–Aug 2 · 5k Race Sunday', days: PLAN.slice(35,42) },
+  { label:'Week 7 · Aug 3–9', days: PLAN.slice(42,49) },
+  { label:'Week 8 · Aug 10–16', days: PLAN.slice(49,56) },
+  { label:'Week 9 · Aug 17–23', days: PLAN.slice(56,63) },
+  { label:'Week 10 · Aug 24–30', days: PLAN.slice(63,70) },
+  { label:'Week 11 · Aug 31–Sep 6', days: PLAN.slice(70,77) },
+  { label:'Week 12 · Sep 7–13', days: PLAN.slice(77,84) },
+  { label:'Week 13 · Sep 14–20', days: PLAN.slice(84,91) },
+  { label:'Week 14 · Sep 21–27', days: PLAN.slice(91,98) },
+  { label:'Week 15 · Sep 28–Oct 3', days: PLAN.slice(98) },
+];
+
+// ── Storage ───────────────────────────────────────────────
+const STORE = 'runplan2026v2';
+const MONTH_ABBR = {jun:'Jun',jul:'Jul',aug:'Aug',sep:'Sep',oct:'Oct'};
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+let PLAN_MAP = {};  // populated after PLAN is defined
+PLAN.forEach(p => { PLAN_MAP[p.id] = p; });
+function load() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch(e) { return {}; } }
+function save(d) { try { localStorage.setItem(STORE, JSON.stringify(d)); } catch(e) {} }
+
+function exportProgress() {
+  const d = load();
+  const box = document.getElementById('export-box');
+  const txt = document.getElementById('export-text');
+
+  const lines = ['RUNNING PLAN PROGRESS EXPORT', '================================'];
+  PLAN.forEach(day => {
+    const state = d[day.id] || {};
+    const parts = [];
+    if (state.status) parts.push('Status: ' + state.status.toUpperCase());
+
+    if (parts.length > 0) {
+      const dayLabel = day.dow + ' ' + day.label + (day.hikeRest ? ' (Hike/Rest)' : day.workouts ? ' (' + day.workouts.map(w => w.lines[0]).join(', ') + ')' : '');
+      lines.push('');
+      lines.push(dayLabel);
+      parts.forEach(p => lines.push('  ' + p));
+    }
+  });
+
+  if (lines.length === 2) { lines.push(''); lines.push('No progress logged yet.'); }
+  txt.value = lines.join('\n');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function copyExport() {
+  const txt = document.getElementById('export-text');
+  txt.select();
+  document.execCommand('copy');
+  const confirm = document.getElementById('copy-confirm');
+  confirm.style.display = 'inline';
+  setTimeout(() => confirm.style.display = 'none', 2000);
+}
+
+// ── Pill HTML ─────────────────────────────────────────────
+function getEdits(id, d) { return d['edits_' + id] || {}; }
+
+function pillsHTML(workouts, id, d) {
+  const edits = getEdits(id, d);
+  const runnaStats = (d[id] || {}).runnaStats || {};
+  let html = '';
+  workouts.forEach((w, wi) => {
+    const cls = edits['cls_' + wi] || w.cls;
+    const label = esc(edits['label_' + wi] !== undefined ? edits['label_' + wi] : w.lines[0]);
+    const total = esc(edits['total_' + wi] !== undefined ? edits['total_' + wi] : (w.total || ''));
+    const notes = esc(edits['notes_' + wi] || '');
+    const extra = w.lines.slice(1).map(l => `<span class="cal-event ${cls}">${l}</span>`).join('');
+    const isRunna = label && label.toLowerCase().includes('runna');
+    const hasSavedStats = isRunna && (runnaStats.miles || runnaStats.time);
+    if (hasSavedStats) {
+      html += `<span class="cal-event ${cls} pill-timed" data-editable="1" onclick="openPillEditor('${id}',${wi},this)" style="display:flex;flex-direction:column;gap:1px;">
+        <span class="pill-label" style="white-space:nowrap;">${label}</span>
+        <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;white-space:nowrap;">
+          <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
+        </span>
+      </span>${extra}`;
+    } else if (total) {
+      html += `<span class="cal-event ${cls} pill-timed" data-editable="1" onclick="openPillEditor('${id}',${wi},this)" style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+        <span class="pill-label" style="white-space:nowrap;">${label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${total}</span>
+      </span>${extra}`;
+    } else {
+      html += `<span class="cal-event ${cls}" data-editable="1" onclick="openPillEditor('${id}',${wi},this)">${label}</span>${extra}`;
+    }
+    if (notes) html += `<div style="font-size:10px;color:#5f5e5a;margin-top:2px;font-style:italic;">${notes}</div>`;
+  });
+  return html;
+}
+
+function weekPillsHTML(workouts, id, d) {
+  const edits = d ? getEdits(id, d) : {};
+  const runnaStats = (d && d[id] || {}).runnaStats || {};
+  let html = '';
+  workouts.forEach((w, wi) => {
+    const cls = edits['cls_' + wi] || w.cls;
+    const label = esc(edits['label_' + wi] !== undefined ? edits['label_' + wi] : w.lines[0]);
+    const total = esc(edits['total_' + wi] !== undefined ? edits['total_' + wi] : (w.total || ''));
+    const notes = esc(edits['notes_' + wi] || '');
+    const isRunna = label && label.toLowerCase().includes('runna');
+    const hasSavedStats = isRunna && (runnaStats.miles || runnaStats.time);
+    w.lines.slice(1).forEach(l => html += `<span class="week-pill ${cls}">${l}</span>`);
+    if (hasSavedStats) {
+      html += `<span class="week-pill ${cls} pill-timed" style="display:flex;flex-direction:column;gap:1px;">
+        <span class="pill-label" style="white-space:nowrap;">${label}</span>
+        <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;">
+          <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
+        </span>
+      </span>`;
+    } else if (total) {
+      html += `<span class="week-pill ${cls} pill-timed" style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
+        <span class="pill-label" style="white-space:nowrap;">${label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${total}</span>
+      </span>`;
+    } else {
+      html += `<span class="week-pill ${cls}">${label}</span>`;
+    }
+    if (notes) html += `<div style="font-size:11px;color:#5f5e5a;margin-top:2px;font-style:italic;">${notes}</div>`;
+  });
+  return html;
+}
+
+function hikeRestPillHTML(id, defaultLabel, d) {
+  const edits = getEdits(id, d);
+  const state = getDayState(id, d);
+  const runnaStats = (d[id] || {}).runnaStats || {};
+  let label = esc(edits['hr_label'] !== undefined ? edits['hr_label'] : defaultLabel);
+  if (state.status === 'hike' && !edits['hr_label']) label = 'Hike';
+  if (state.status === 'rest' && !edits['hr_label']) label = 'Rest';
+  const cls = edits['hr_cls'] || 'ev-hike';
+  const hasSavedStats = state.status === 'hike' && (runnaStats.miles || runnaStats.time);
+  if (hasSavedStats) {
+    return `<span class="cal-event ${cls} pill-timed" data-editable="1" onclick="openHikeRestEditor('${id}',this)" style="display:flex;flex-direction:column;gap:1px;">
+      <span class="pill-label" style="white-space:nowrap;">${label}</span>
+      <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;white-space:nowrap;">
+        <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
+      </span>
+    </span>`;
+  }
+  return `<span class="cal-event ${cls}" data-editable="1" onclick="openHikeRestEditor('${id}',this)">${label}</span>`;
+}
+
+function hikeRestWeekPillHTML(id, defaultLabel, d) {
+  const edits = getEdits(id, d);
+  const state = getDayState(id, d);
+  const runnaStats = (d[id] || {}).runnaStats || {};
+  let label = esc(edits['hr_label'] !== undefined ? edits['hr_label'] : defaultLabel);
+  if (state.status === 'hike' && !edits['hr_label']) label = 'Hike';
+  if (state.status === 'rest' && !edits['hr_label']) label = 'Rest';
+  const cls = edits['hr_cls'] || 'ev-hike';
+  const hasSavedStats = state.status === 'hike' && (runnaStats.miles || runnaStats.time);
+  if (hasSavedStats) {
+    return `<span class="week-pill ${cls} pill-timed" style="display:flex;flex-direction:column;gap:1px;">
+      <span class="pill-label" style="white-space:nowrap;">${label}</span>
+      <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;">
+        <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
+      </span>
+    </span>`;
+  }
+  return `<span class="week-pill ${cls}" data-editable="1" onclick="openHikeRestEditor('${id}',this)">${label}</span>`;
+}
+
+function isStillHikeRest(id, d, defaultHikeRest) {
+  if (!defaultHikeRest) return false;
+  const edits = getEdits(id, d);
+  if (!edits['hr_label']) return true; // not edited, keep hike/rest
+  const cls = edits['hr_cls'] || 'ev-hike';
+  return cls === 'ev-hike'; // still hike/rest color = still hike/rest controls
+}
+
+function openHikeRestEditor(id, pillEl) {
+  document.querySelectorAll('.pill-editor').forEach(e => e.remove());
+  const d = load();
+  const edits = getEdits(id, d);
+  const label = edits['hr_label'] !== undefined ? edits['hr_label'] : pillEl.textContent;
+  const notes = edits['notes_hr'] || '';
+
+  const editor = document.createElement('div');
+  editor.className = 'pill-editor';
+  editor.innerHTML = `
+    <div class="pill-editor-label">Label</div>
+    <input id="pe-hr-label" value="${label.replace(/"/g,'&quot;')}" placeholder="e.g. Hike / rest" />
+    <div class="pill-editor-label">Notes</div>
+    <textarea id="pe-hr-notes" placeholder="Optional notes...">${notes}</textarea>
+    <div class="pill-editor-btns">
+      <button class="pill-editor-btn pill-editor-save" onclick="saveHikeRestEdit('${id}')">Save</button>
+      <button class="pill-editor-btn pill-editor-cancel" onclick="this.closest('.pill-editor').remove()">Cancel</button>
+      <button class="pill-editor-btn pill-editor-cancel" style="margin-left:auto;" onclick="resetHikeRestEdit('${id}')">Reset</button>
+    </div>`;
+  pillEl.parentNode.insertBefore(editor, pillEl.nextSibling);
+  editor.querySelector('#pe-hr-label').focus();
+}
+
+function saveHikeRestEdit(id) {
+  const d = load();
+  d['edits_' + id] = d['edits_' + id] || {};
+  const label = document.getElementById('pe-hr-label').value.trim();
+  d['edits_' + id]['hr_label'] = label;
+  d['edits_' + id]['notes_hr'] = document.getElementById('pe-hr-notes').value.trim();
+  const cls = inferPillClass(label) || 'ev-hike';
+  d['edits_' + id]['hr_cls'] = cls;
+  save(d); render();
+}
+
+function resetHikeRestEdit(id) {
+  const d = load();
+  if (d['edits_' + id]) {
+    delete d['edits_' + id]['hr_label'];
+    delete d['edits_' + id]['hr_cls'];
+    delete d['edits_' + id]['notes_hr'];
+    if (Object.keys(d['edits_' + id]).length === 0) delete d['edits_' + id];
+  }
+  save(d); render();
+}
+
+function openPillEditor(id, wi, pillEl) {
+  // Close any open editors first
+  document.querySelectorAll('.pill-editor').forEach(e => e.remove());
+  const d = load();
+  const day = PLAN_MAP[id];
+  if (!day || !day.workouts) return;
+  const w = day.workouts[wi];
+  const edits = getEdits(id, d);
+  const label = esc(edits['label_' + wi] !== undefined ? edits['label_' + wi] : w.lines[0]);
+  const total = esc(edits['total_' + wi] !== undefined ? edits['total_' + wi] : (w.total || ''));
+  const notes = esc(edits['notes_' + wi] || '');
+
+  const editor = document.createElement('div');
+  editor.className = 'pill-editor';
+  editor.innerHTML = `
+    <div class="pill-editor-label">Workout</div>
+    <input id="pe-label" value="${label.replace(/"/g,'&quot;')}" placeholder="Workout name" />
+    <div class="pill-editor-label">Total time</div>
+    <input id="pe-total" value="${total.replace(/"/g,'&quot;')}" placeholder="e.g. Total: 30 min" />
+    <div class="pill-editor-label">Notes</div>
+    <textarea id="pe-notes" placeholder="Optional notes...">${notes}</textarea>
+    <div class="pill-editor-btns">
+      <button class="pill-editor-btn pill-editor-save" onclick="savePillEdit('${id}',${wi})">Save</button>
+      <button class="pill-editor-btn pill-editor-cancel" onclick="this.closest('.pill-editor').remove()">Cancel</button>
+      <button class="pill-editor-btn pill-editor-cancel" style="margin-left:auto;" onclick="resetPillEdit('${id}',${wi})">Reset</button>
+    </div>`;
+  pillEl.parentNode.insertBefore(editor, pillEl.nextSibling);
+  editor.querySelector('#pe-label').focus();
+}
+
+function inferPillClass(label) {
+  const l = label.toLowerCase();
+  if (l.includes('strength')) return 'ev-strength';
+  if (l.includes('hike') || l.includes('rest')) return 'ev-hike';
+  if (l.includes('walk') || l.includes('yoga') || l.includes('mobility')) return 'ev-walk';
+  if (l.includes('run') || l.includes('easy') || l.includes('tempo') || l.includes('strides') ||
+      l.includes('hills') || l.includes('long') || l.includes('shakeout') || l.includes('recovery') ||
+      l.includes('5k') || l.includes('race') || l.includes('runna')) return 'ev-run';
+  return null; // keep original
+}
+
+function savePillEdit(id, wi) {
+  const d = load();
+  d['edits_' + id] = d['edits_' + id] || {};
+  const label = document.getElementById('pe-label').value.trim();
+  d['edits_' + id]['label_' + wi] = label;
+  d['edits_' + id]['total_' + wi] = document.getElementById('pe-total').value.trim();
+  d['edits_' + id]['notes_' + wi] = document.getElementById('pe-notes').value.trim();
+  const cls = inferPillClass(label);
+  if (cls) d['edits_' + id]['cls_' + wi] = cls;
+  else delete d['edits_' + id]['cls_' + wi];
+  save(d); render();
+}
+
+function resetPillEdit(id, wi) {
+  const d = load();
+  if (d['edits_' + id]) {
+    delete d['edits_' + id]['label_' + wi];
+    delete d['edits_' + id]['total_' + wi];
+    delete d['edits_' + id]['notes_' + wi];
+    delete d['edits_' + id]['cls_' + wi];
+    if (Object.keys(d['edits_' + id]).length === 0) delete d['edits_' + id];
+  }
+  save(d); render();
+}
+
+function openMovePicker(fromId) {
+  document.querySelectorAll('.move-picker').forEach(e => e.remove());
+  const seg = document.querySelector(`#ctrl-${fromId}`);
+  if (!seg) return;
+  const picker = document.createElement('div');
+  picker.className = 'move-picker';
+  picker.style.cssText = 'margin-top:4px;background:#faf9f6;border:0.5px solid rgba(0,0,0,0.15);border-radius:5px;padding:5px 6px;';
+  picker.innerHTML = buildMovePickerHTML(fromId, 'current', null);
+  seg.parentNode.insertBefore(picker, seg.nextSibling);
+}
+
+const _planDateCache = {};
+function planDateFor(p) {
+  if (_planDateCache[p.id]) return _planDateCache[p.id];
+  const m = p.id.match(/([a-z]+)(\d+)/);
+  if (!m) return null;
+  const months = {jun:5,jul:6,aug:7,sep:8,oct:9};
+  const mo = months[m[1]];
+  if (mo === undefined) return null;
+  _planDateCache[p.id] = new Date(2026, mo, parseInt(m[2]));
+  return _planDateCache[p.id];
+}
+
+function buildMovePickerHTML(fromId, range, selectedId) {
+  const today = new Date();
+  // Use the week of the workout being moved, not today
+  const fromDay = PLAN_MAP[fromId];
+  const fromDate = fromDay ? planDateFor(fromDay) : new Date(2026, today.getMonth(), today.getDate());
+  const baseDate = fromDate || new Date(2026, today.getMonth(), today.getDate());
+  const dayOfWeek = baseDate.getDay();
+  const weekStart = new Date(baseDate); weekStart.setDate(baseDate.getDate() - dayOfWeek);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+
+  let filteredDays;
+  if (range === 'current') {
+    filteredDays = PLAN.filter(p => { if (p.id === fromId) return false; const d = planDateFor(p); return d && d >= weekStart && d <= weekEnd; });
+  } else if (range === 'past') {
+    filteredDays = PLAN.filter(p => { if (p.id === fromId) return false; const d = planDateFor(p); return d && d < weekStart; }).slice(-14);
+  } else {
+    filteredDays = PLAN.filter(p => { if (p.id === fromId) return false; const d = planDateFor(p); return d && d > weekEnd; }).slice(0, 14);
+  }
+
+  const options = filteredDays.map(p => {
+    const m = p.id.match(/([a-z]+)(\d+)/);
+    const mon = m ? MONTH_ABBR[m[1]] || m[1] : '';
+    const dayNum = m ? m[2] : '';
+    const sel = selectedId === p.id ? ' selected' : '';
+    return `<option value="${p.id}"${sel}>${p.dow}, ${mon} ${dayNum}</option>`;
+  }).join('');
+
+  const rangeLabel = range === 'current' ? 'This week' : range === 'past' ? 'Past 2 weeks' : 'Next 2 weeks';
+  const btnStyle = (active) => `font-family:'Poppins',sans-serif;font-size:9px;background:${active?'#E8EDE0':'#f5f4f0'};color:${active?'#3A4A28':'#5f5e5a'};border:0.5px solid ${active?'#A8BF90':'#ccc'};border-radius:3px;padding:2px 5px;cursor:pointer;`;
+  return `
+    <div style="font-size:9px;color:#888;margin-bottom:4px;">Move to — ${rangeLabel}</div>
+    <select id="move-date-${fromId}" style="font-family:'Poppins',sans-serif;font-size:10px;width:100%;border:0.5px solid rgba(0,0,0,0.15);border-radius:3px;padding:2px 4px;background:#fff;margin-bottom:4px;">
+      <option value="">Pick a day…</option>${options}
+    </select>
+    <div style="display:flex;gap:3px;margin-bottom:4px;">
+      <button onclick="refreshMovePicker('${fromId}','past')" style="${btnStyle(range==='past')}">←</button>
+      <button onclick="refreshMovePicker('${fromId}','future')" style="${btnStyle(range==='future')}">→</button>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button onclick="saveMove('${fromId}')" style="font-family:'Poppins',sans-serif;font-size:9px;background:#E8EDE0;color:#3A4A28;border:0.5px solid #A8BF90;border-radius:3px;padding:2px 6px;cursor:pointer;flex:1;">Save</button>
+      <button onclick="this.closest('.move-picker').remove()" style="font-family:'Poppins',sans-serif;font-size:9px;background:#f5f4f0;color:#5f5e5a;border:0.5px solid #ccc;border-radius:3px;padding:2px 6px;cursor:pointer;">Cancel</button>
+    </div>`;
+}
+
+function refreshMovePicker(fromId, range) {
+  const picker = document.querySelector('.move-picker');
+  if (!picker) return;
+  const current = document.getElementById('move-date-' + fromId);
+  const selected = current ? current.value : null;
+  picker.innerHTML = buildMovePickerHTML(fromId, range, selected);
+}
+
+function saveMove(fromId) {
+  const sel = document.getElementById('move-date-' + fromId);
+  if (!sel || !sel.value) return;
+  const toId = sel.value;
+  const d = load();
+
+  const toDay = PLAN_MAP[toId];
+  const isHikeRestDay = toDay && (toDay.hikeRest || toDay.restOnly);
+
+  // Mark original as moved, store destination
+  d[fromId] = d[fromId] || {};
+  d[fromId].status = 'moved';
+  d[fromId].movedTo = toId;
+
+  // Add as extra workout on destination day
+  d['extra_' + toId] = d['extra_' + toId] || [];
+  if (!d['extra_' + toId].find(e => e.fromId === fromId)) {
+    const fromDay = PLAN_MAP[fromId];
+    const label = fromDay && fromDay.workouts ? fromDay.workouts[0].lines[0] : 'Workout';
+    const cls = fromDay && fromDay.workouts ? fromDay.workouts[0].cls : 'ev-run';
+    const total = fromDay && fromDay.workouts ? (fromDay.workouts[0].total || '') : '';
+    // Only the first workout moved to a hike/rest day replaces it; others append
+    const alreadyReplaced = d['extra_' + toId].some(e => e.replacesHikeRest);
+    d['extra_' + toId].push({ fromId, label, cls, total, replacesHikeRest: isHikeRestDay && !alreadyReplaced });
+  }
+
+  // If replacing a hike/rest day, clear any existing hike/rest status
+  if (isHikeRestDay) delete d[toId];
+
+  save(d);
+  document.querySelectorAll('.move-picker').forEach(e => e.remove());
+  render();
+}
+function extraPillHTML(toId, ex, exState, d) {
+  const status = exState.status || '';
+  const fromDay = PLAN_MAP[ex.fromId];
+  const fromLabel = fromDay ? `${fromDay.dow} ${fromDay.date}` : ex.fromId;
+  const isRunna = ex.label && ex.label.toLowerCase().includes('runna');
+  const runnaStats = (d[ex.fromId + '_extrastats_' + toId] || {});
+  const hasStats = runnaStats.miles || runnaStats.time;
+
+  let html = `<div style="border-top:0.5px solid rgba(0,0,0,0.08);margin-top:4px;padding-top:4px;">`;
+  html += `<div style="font-size:9px;color:#A0AABB;margin-bottom:2px;">from ${fromLabel}</div>`;
+
+  // Pill — show stats inline if saved
+  if (ex.total || (isRunna && hasStats)) {
+    if (isRunna && hasStats) {
+      html += `<span class="cal-event ${ex.cls} pill-timed" style="display:flex;flex-direction:column;gap:1px;" onclick="openExtraRunnaStats('${toId}','${ex.fromId}')">
+        <span class="pill-label" style="white-space:nowrap;">${ex.label}</span>
+        <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;white-space:nowrap;">
+          <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
+        </span>
+      </span>`;
+    } else {
+      html += `<span class="cal-event ${ex.cls} pill-timed" style="display:flex;justify-content:space-between;align-items:center;gap:4px;"><span class="pill-label" style="white-space:nowrap;">${ex.label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${ex.total}</span></span>`;
+    }
+  } else {
+    html += `<span class="cal-event ${ex.cls}">${ex.label}</span>`;
+  }
+
+  // Status toggle
+  if (status === 'done' || status === 'skipped') {
+    html += `<div class="seg-wrap" id="exctrl-${toId}-${ex.fromId}" style="display:none;"><div class="seg-toggle">
+      <div class="seg-btn ${status==='done'?'active-done':''}" onclick="setExtraStatus('${toId}','${ex.fromId}','done')"><span class="css-done"></span></div>
+      <div class="seg-divider"></div>
+      <div class="seg-btn ${status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${toId}','${ex.fromId}','skipped')"><span class="css-skip"></span></div>
+      <div class="seg-divider"></div>
+      <div class="seg-btn" onclick="openExtraMovePicker('${toId}','${ex.fromId}')" title="Move again"><span class="css-moved">→</span></div>
+    </div></div>`;
+  } else {
+    html += `<div class="seg-wrap" id="exctrl-${toId}-${ex.fromId}"><div class="seg-toggle">
+      <div class="seg-btn ${status==='done'?'active-done':''}" onclick="setExtraStatus('${toId}','${ex.fromId}','done')"><span class="css-done"></span></div>
+      <div class="seg-divider"></div>
+      <div class="seg-btn ${status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${toId}','${ex.fromId}','skipped')"><span class="css-skip"></span></div>
+      <div class="seg-divider"></div>
+      <div class="seg-btn ${status==='moved'?'active-moved':''}" onclick="openExtraMovePicker('${toId}','${ex.fromId}')" title="Move again"><span class="css-moved">→</span></div>
+    </div></div>`;
+  }
+
+  // Runna stats input — show when done and no stats yet
+  if (isRunna && status === 'done' && !hasStats) {
+    html += extraRunnaStatsHTML(toId, ex.fromId);
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function extraRunnaStatsHTML(toId, fromId) {
+  return `<div id="extra-runna-stats-${toId}-${fromId}" style="margin-top:3px;">
+    <div style="display:flex;gap:4px;">
+      <input id="ers-miles-${toId}-${fromId}" placeholder="miles" style="font-family:'Poppins',sans-serif;font-size:10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:3px;padding:2px 4px;width:50%;background:#faf9f6;color:#111;" type="number" step="0.01" min="0" />
+      <input id="ers-time-${toId}-${fromId}" placeholder="hh:mm" oninput="formatTimeInput(this)" maxlength="5" style="font-family:'Poppins',sans-serif;font-size:10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:3px;padding:2px 4px;width:50%;background:#faf9f6;color:#111;" />
+    </div>
+    <button onclick="saveExtraRunnaStats('${toId}','${fromId}')" style="font-family:'Poppins',sans-serif;font-size:9px;margin-top:3px;background:#E8EDE0;color:#3A4A28;border:0.5px solid #A8BF90;border-radius:3px;padding:2px 6px;cursor:pointer;width:100%;">Save</button>
+  </div>`;
+}
+
+function openExtraRunnaStats(toId, fromId) {
+  const d = load();
+  delete d[fromId + '_extrastats_' + toId];
+  save(d); render();
+  setTimeout(() => { const el = document.getElementById('ers-miles-' + toId + '-' + fromId); if (el) el.focus(); }, 50);
+}
+
+function saveExtraRunnaStats(toId, fromId) {
+  const miles = document.getElementById('ers-miles-' + toId + '-' + fromId);
+  const time = document.getElementById('ers-time-' + toId + '-' + fromId);
+  if (!miles) return;
+  const d = load();
+  d[fromId + '_extrastats_' + toId] = { miles: miles.value.trim(), time: time ? time.value.trim() : '' };
+  save(d); render();
+}
+
+function openExtraMovePicker(currentToId, fromId) {
+  document.querySelectorAll('.move-picker').forEach(e => e.remove());
+  const ctrl = document.getElementById('exctrl-' + currentToId + '-' + fromId);
+  if (!ctrl) return;
+  const picker = document.createElement('div');
+  picker.className = 'move-picker';
+  picker.style.cssText = 'margin-top:4px;background:#faf9f6;border:0.5px solid rgba(0,0,0,0.15);border-radius:5px;padding:5px 6px;';
+  picker.innerHTML = buildExtraPickerHTML(currentToId, fromId, 'current', null);
+  ctrl.parentNode.insertBefore(picker, ctrl.nextSibling);
+}
+
+function buildExtraPickerHTML(currentToId, fromId, range, selectedId) {
+  const fromDay = PLAN_MAP[fromId];
+  const fromDate = fromDay ? planDateFor(fromDay) : null;
+  const baseDate = fromDate || planDateFor(PLAN_MAP[currentToId]) || new Date(2026, 7, 1);
+  const dayOfWeek = baseDate.getDay();
+  const weekStart = new Date(baseDate); weekStart.setDate(baseDate.getDate() - dayOfWeek);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6);
+
+  let filteredDays;
+  if (range === 'current') {
+    filteredDays = PLAN.filter(p => { if (p.id === currentToId || p.id === fromId) return false; const d = planDateFor(p); return d && d >= weekStart && d <= weekEnd; });
+  } else if (range === 'past') {
+    filteredDays = PLAN.filter(p => { if (p.id === currentToId || p.id === fromId) return false; const d = planDateFor(p); return d && d < weekStart; }).slice(-14);
+  } else {
+    filteredDays = PLAN.filter(p => { if (p.id === currentToId || p.id === fromId) return false; const d = planDateFor(p); return d && d > weekEnd; }).slice(0, 14);
+  }
+
+  const options = filteredDays.map(p => {
+    const m = p.id.match(/([a-z]+)(\d+)/);
+    const mon = m ? MONTH_ABBR[m[1]] || m[1] : '';
+    const dayNum = m ? m[2] : '';
+    const sel = selectedId === p.id ? ' selected' : '';
+    return `<option value="${p.id}"${sel}>${p.dow}, ${mon} ${dayNum}</option>`;
+  }).join('');
+
+  const btnStyle = (active) => `font-family:'Poppins',sans-serif;font-size:9px;background:${active?'#E8EDE0':'#f5f4f0'};color:${active?'#3A4A28':'#5f5e5a'};border:0.5px solid ${active?'#A8BF90':'#ccc'};border-radius:3px;padding:2px 5px;cursor:pointer;`;
+  return `
+    <div style="font-size:9px;color:#888;margin-bottom:4px;">Move again to</div>
+    <select id="extramove-date-${currentToId}-${fromId}" style="font-family:'Poppins',sans-serif;font-size:10px;width:100%;border:0.5px solid rgba(0,0,0,0.15);border-radius:3px;padding:2px 4px;background:#fff;margin-bottom:4px;">
+      <option value="">Pick a day…</option>${options}
+    </select>
+    <div style="display:flex;gap:3px;margin-bottom:4px;">
+      <button onclick="refreshExtraMovePicker('${currentToId}','${fromId}','past')" style="${btnStyle(range==='past')}">←</button>
+      <button onclick="refreshExtraMovePicker('${currentToId}','${fromId}','future')" style="${btnStyle(range==='future')}">→</button>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button onclick="saveExtraMove('${currentToId}','${fromId}')" style="font-family:'Poppins',sans-serif;font-size:9px;background:#E8EDE0;color:#3A4A28;border:0.5px solid #A8BF90;border-radius:3px;padding:2px 6px;cursor:pointer;flex:1;">Save</button>
+      <button onclick="this.closest('.move-picker').remove()" style="font-family:'Poppins',sans-serif;font-size:9px;background:#f5f4f0;color:#5f5e5a;border:0.5px solid #ccc;border-radius:3px;padding:2px 6px;cursor:pointer;">Cancel</button>
+    </div>`;
+}
+
+function refreshExtraMovePicker(currentToId, fromId, range) {
+  const picker = document.querySelector('.move-picker');
+  if (!picker) return;
+  const current = document.getElementById('extramove-date-' + currentToId + '-' + fromId);
+  const selected = current ? current.value : null;
+  picker.innerHTML = buildExtraPickerHTML(currentToId, fromId, range, selected);
+}
+
+function saveExtraMove(currentToId, fromId) {
+  const sel = document.getElementById('extramove-date-' + currentToId + '-' + fromId);
+  if (!sel || !sel.value) return;
+  const newToId = sel.value;
+  const d = load();
+  // Remove from current destination
+  d['extra_' + currentToId] = (d['extra_' + currentToId] || []).filter(ex => ex.fromId !== fromId);
+  delete d['exstatus_' + currentToId + '_' + fromId];
+  // Add to new destination
+  const ex = { fromId, label: d[fromId] ? (d['edits_' + fromId] && d['edits_' + fromId]['label_0']) || '' : '' };
+  // Get label/cls/total from original PLAN day
+  const origDay = PLAN_MAP[fromId];
+  if (origDay && origDay.workouts) {
+    ex.label = ex.label || origDay.workouts[0].lines[0];
+    ex.cls = origDay.workouts[0].cls;
+    ex.total = origDay.workouts[0].total || '';
+  }
+  d['extra_' + newToId] = d['extra_' + newToId] || [];
+  if (!d['extra_' + newToId].find(e => e.fromId === fromId)) {
+    d['extra_' + newToId].push(ex);
+  }
+  // Update original day's movedTo
+  if (d[fromId]) d[fromId].movedTo = newToId;
+  save(d);
+  document.querySelectorAll('.move-picker').forEach(e => e.remove());
+  render();
+}
+
+function setExtraStatus(toId, fromId, status) {
+  const d = load();
+  d['exstatus_' + toId + '_' + fromId] = d['exstatus_' + toId + '_' + fromId] || {};
+  d['exstatus_' + toId + '_' + fromId].status = status;
+  save(d); render();
+}
+
+const RACE_DAY_IDS = new Set(['aug2', 'oct3']);
+
+function is5kDay(id) { return RACE_DAY_IDS.has(id); }
+
+function isRunnaDay(id, d) {
+  const day = PLAN_MAP[id];
+  if (!day || !day.workouts) return false;
+  const edits = getEdits(id, d);
+  const label = edits['label_0'] !== undefined ? edits['label_0'] : (day.workouts[0] && day.workouts[0].lines[0]);
+  return label && label.toLowerCase().includes('runna');
+}
+
+function runnaStatsHTML(id, d) {
+  const stats = (d[id] || {}).runnaStats || {};
+  const miles = stats.miles || '';
+  const time = stats.time || '';
+  if (miles || time) {
+    return `<div onclick="openRunnaStats('${id}')" style="display:flex;justify-content:space-between;font-size:10px;opacity:0.85;margin-top:3px;cursor:pointer;padding:1px 0;">
+      <span>${miles ? miles + ' mi' : ''}</span><span>${time}</span>
+    </div>`;
+  }
+  return `<div id="runna-stats-${id}" style="margin-top:3px;">
+    <div style="display:flex;gap:4px;">
+      <input id="rs-miles-${id}" placeholder="miles" style="font-family:'Poppins',sans-serif;font-size:10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:3px;padding:2px 4px;width:50%;background:#faf9f6;color:#111;" type="number" step="0.01" min="0" />
+      <input id="rs-time-${id}" placeholder="hh:mm" oninput="formatTimeInput(this)" maxlength="5" style="font-family:'Poppins',sans-serif;font-size:10px;border:0.5px solid rgba(0,0,0,0.2);border-radius:3px;padding:2px 4px;width:50%;background:#faf9f6;color:#111;" />
+    </div>
+    <button onclick="saveRunnaStats('${id}')" style="font-family:'Poppins',sans-serif;font-size:9px;margin-top:3px;background:#E8EDE0;color:#3A4A28;border:0.5px solid #A8BF90;border-radius:3px;padding:2px 6px;cursor:pointer;width:100%;">Save</button>
+  </div>`;
+}
+
+function openRunnaStats(id) {
+  const d = load();
+  d[id] = d[id] || {};
+  d[id].runnaStats = {};
+  save(d); render();
+  setTimeout(() => { const el = document.getElementById('rs-miles-' + id); if (el) el.focus(); }, 50);
+}
+
+function saveRunnaStats(id) {
+  const miles = document.getElementById('rs-miles-' + id);
+  const time = document.getElementById('rs-time-' + id);
+  if (!miles) return;
+  const d = load();
+  d[id] = d[id] || {};
+  d[id].runnaStats = { miles: miles.value.trim(), time: time ? time.value.trim() : '' };
+  save(d); render();
+}
+
+function raceClockHTML(id, d) {
+  const time = (d[id] || {}).raceTime || '';
+  if (time) {
+    return `<div class="race-clock" onclick="openRaceClock('${id}')">
+      <div class="race-clock-label">Official time</div>
+      <div class="race-clock-time">${time}</div>
+    </div>`;
+  }
+  return `<div class="race-clock" onclick="openRaceClock('${id}')">
+    <div class="race-clock-label">Official time</div>
+    <input class="race-clock-input" id="rc-${id}" placeholder="hh:mm" oninput="formatTimeInput(this)" maxlength="5"
+      onkeydown="if(event.key==='Enter')saveRaceTime('${id}')"
+      onclick="event.stopPropagation()" />
+    <button class="race-clock-save" onclick="event.stopPropagation();saveRaceTime('${id}')">Save</button>
+  </div>`;
+}
+
+function openRaceClock(id) {
+  const d = load();
+  d[id] = d[id] || {};
+  d[id].raceTime = '';
+  save(d); render();
+  setTimeout(() => { const el = document.getElementById('rc-' + id); if (el) el.focus(); }, 50);
+}
+
+function saveRaceTime(id) {
+  const input = document.getElementById('rc-' + id);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  const d = load(); d[id] = d[id] || {}; d[id].raceTime = val; save(d); render();
+}
+
+// ── Controls ──────────────────────────────────────────────
+function segControls(id, state, hikeRest, restOnly) {
+  const status = state.status || '';
+  if (status) {
+    const label = status === 'hike' ? '<span class="css-hike"></span>' : status === 'rest' ? '<span class="css-rest"></span>' : '';
+
+    // For 5k days marked done, show race clock
+    if (status === 'done' && is5kDay(id)) {
+      const d = load();
+      return `<div class="seg-wrap" id="ctrl-${id}" style="display:none;">
+        ${segToggleHTML(id, status, hikeRest, restOnly)}
+      </div>${raceClockHTML(id, d)}`;
+    }
+
+    // For done/skipped — just hide controls, cell shading is sufficient
+    if (status === 'done' || status === 'skipped') {
+      const d = load();
+      const runna = isRunnaDay(id, d);
+      const stats = (d[id] || {}).runnaStats || {};
+      const hasStats = stats.miles || stats.time;
+      const inputHTML = (runna && !hasStats) ? runnaStatsHTML(id, d) : '';
+      return `<div class="seg-wrap" id="ctrl-${id}" style="display:none;">
+        ${segToggleHTML(id, status, hikeRest, restOnly)}
+      </div>${inputHTML}`;
+    }
+
+    // For hike — show stats input if needed, no circle after logged
+    if (status === 'hike') {
+      const d = load();
+      const stats = (d[id] || {}).runnaStats || {};
+      const hasStats = stats.miles || stats.time;
+      const inputHTML = !hasStats ? runnaStatsHTML(id, d) : '';
+      return `<div class="seg-wrap" id="ctrl-${id}" style="display:none;">
+        ${segToggleHTML(id, status, hikeRest, restOnly)}
+      </div>${inputHTML}`;
+    }
+
+    // For rest — just hide controls
+    return `<div class="seg-wrap" id="ctrl-${id}" style="display:none;">
+      ${segToggleHTML(id, status, hikeRest, restOnly)}
+    </div>`;
+  }
+  return `<div class="seg-wrap" id="ctrl-${id}">
+    ${segToggleHTML(id, status, hikeRest, restOnly)}
+  </div>`;
+}
+
+function segToggleHTML(id, status, hikeRest, restOnly) {
+  if (restOnly) {
+    return `<div class="seg-toggle">
+      <div class="seg-btn ${status==='rest'?'active-rest':''}" onclick="setStatus('${id}','rest')"><span class="css-rest"></span></div>
+    </div>`;
+  }
+  if (hikeRest) {
+    return `<div class="seg-toggle">
+      <div class="seg-btn ${status==='hike'?'active-hike':''}" onclick="setStatus('${id}','hike')"><span class="css-hike"></span></div>
+      <div class="seg-divider"></div>
+      <div class="seg-btn ${status==='rest'?'active-rest':''}" onclick="setStatus('${id}','rest')"><span class="css-rest"></span></div>
+    </div>`;
+  }
+  return `<div class="seg-toggle">
+    <div class="seg-btn ${status==='done'?'active-done':''}" onclick="setStatus('${id}','done')"><span class="css-done"></span></div>
+    <div class="seg-divider"></div>
+    <div class="seg-btn ${status==='skipped'?'active-skip':''}" onclick="setStatus('${id}','skipped')"><span class="css-skip"></span></div>
+    <div class="seg-divider"></div>
+    <div class="seg-btn ${status==='moved'?'active-moved':''}" onclick="openMovePicker('${id}')" title="Moved to another day"><span class="css-moved">→</span></div>
+  </div>`;
+}
+
+function weekSegControls(id, state, hikeRest, restOnly) {
+  const status = state.status || '';
+  if (restOnly) {
+    return `<div class="week-seg-toggle">
+      <div class="week-seg-btn ${status==='rest'?'active-rest':''}" onclick="setStatus('${id}','rest')"><span class="css-rest"></span> Rested</div>
+    </div>`;
+  }
+  if (hikeRest) {
+    return `<div class="week-seg-toggle">
+      <div class="week-seg-btn ${status==='hike'?'active-hike':''}" onclick="setStatus('${id}','hike')"><span class="css-hike"></span> Hiked</div>
+      <div class="seg-divider" style="height:18px;"></div>
+      <div class="week-seg-btn ${status==='rest'?'active-rest':''}" onclick="setStatus('${id}','rest')"><span class="css-rest"></span> Rested</div>
+    </div>`;
+  }
+  return `<div class="week-seg-toggle">
+      <div class="week-seg-btn ${status==='done'?'active-done':''}" onclick="setStatus('${id}','done')"><span class="css-done"></span> Done</div>
+      <div class="seg-divider" style="height:18px;"></div>
+      <div class="week-seg-btn ${status==='skipped'?'active-skip':''}" onclick="setStatus('${id}','skipped')"><span class="css-skip"></span> Skipped</div>
+      <div class="seg-divider" style="height:18px;"></div>
+      <div class="week-seg-btn ${status==='moved'?'active-moved':''}" onclick="openMovePicker('${id}')"><span style="color:#8AAABB;">→</span> Moved</div>
+    </div>`;
+}
+
+// ── Render ────────────────────────────────────────────────
+function formatTimeDisplay(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  if (s.includes(':')) {
+    const parts = s.split(':');
+    const h = parseInt(parts[0]) || 0;
+    const m = parseInt(parts[1]) || 0;
+    if (h > 0) return m > 0 ? `${h} h ${m} min` : `${h} h`;
+    return `${m} min`;
+  }
+  const mins = parseInt(s) || 0;
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m > 0 ? `${h} h ${m} min` : `${h} h`;
+  }
+  return `${mins} min`;
+}
+
+function formatTimeInput(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 4);
+  if (v.length >= 3) v = v.slice(0, 2) + ':' + v.slice(2);
+  input.value = v;
+}
+
+function render() {
+  const d = load();
+  renderDesktop(d);
+  renderMobile(d);
+  updateTracker(d);
+  requestAnimationFrame(checkPillOverflow);
+}
+
+function checkPillOverflow() {
+  document.querySelectorAll('.pill-timed').forEach(pill => {
+    const label = pill.querySelector('.pill-label');
+    const time = pill.querySelector('.pill-time');
+    if (!label || !time) return;
+    // Reset to inline
+    pill.style.flexDirection = 'row';
+    pill.style.alignItems = 'center';
+    pill.style.flexWrap = '';
+    // Check overflow
+    if (pill.scrollWidth > pill.clientWidth + 1) {
+      // Stack time below, label stays on one line
+      pill.style.flexDirection = 'column';
+      pill.style.alignItems = 'flex-start';
+    }
+  });
+}
+
+function updateTracker(d) {
+  const today = new Date();
+  const todayDate = new Date(2026, today.getMonth(), today.getDate());
+
+  let total = 0;
+  let completed = 0;
+
+  // Count weekday workouts up to and including today
+  PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').forEach(day => {
+    const dayDate = planDateFor(day);
+    if (!dayDate || dayDate > todayDate) return;
+    total++;
+    const state = d[day.id] || {};
+    if (state.status === 'done') completed++;
+    // Count extra workouts received on this day that are marked done
+    const extras = d['extra_' + day.id] || [];
+    extras.forEach(ex => {
+      const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
+      if (exState.status === 'done') completed++;
+    });
+  });
+
+  // Add weekend hikes to both total and completed (only up to today)
+  PLAN.filter(p => p.dow === 'Sat' || p.dow === 'Sun').forEach(day => {
+    const dayDate = planDateFor(day);
+    if (!dayDate || dayDate > todayDate) return;
+    const state = d[day.id] || {};
+    if (state.status === 'hike') { total++; completed++; }
+  });
+
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  document.getElementById('tracker-label').textContent = completed + ' of ' + total + ' workouts complete';
+  document.getElementById('tracker-bar').style.width = pct + '%';
+  document.getElementById('tracker-pct').textContent = pct + '%';
+}
+
+function getDayState(id, d) {
+  return d[id] || {};
+}
+
+function cellStatusClass(id, d) {
+  const state = getDayState(id, d);
+  const extras = d['extra_' + id] || [];
+
+  if (state.status) {
+    if (state.status === 'moved') {
+      const hasExtras = extras.length > 0;
+      if (hasExtras) {
+        // Cell was moved but has extras — shade based on extra status
+        const anyDone = extras.some(ex => (d['exstatus_' + id + '_' + ex.fromId] || {}).status === 'done');
+        const anySkipped = extras.some(ex => (d['exstatus_' + id + '_' + ex.fromId] || {}).status === 'skipped');
+        if (anyDone) return 'status-done';
+        if (anySkipped) return 'status-skipped';
+        return ''; // extras present but not yet logged
+      }
+    }
+    return 'status-' + state.status;
+  }
+
+  // Check if a replacing extra workout on this day is done/skipped
+  const replacer = extras.find(ex => ex.replacesHikeRest);
+  if (replacer) {
+    const exState = d['exstatus_' + id + '_' + replacer.fromId] || {};
+    if (exState.status) return 'status-' + exState.status;
+  }
+  return '';
+}
+
+function renderDesktop(d) {
+  const cal = document.getElementById('desktop-cal');
+  let html = '';
+  MONTHS.forEach(month => {
+    html += `<div class="cal-month"><div class="cal-month-label">${month.label}</div><div class="cal-grid">`;
+    html += '<div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>';
+    month.days.forEach(day => {
+      if (day === 'empty') { html += '<div class="cal-day empty"></div>'; return; }
+      const state = getDayState(day.id, d);
+      const statusCls = cellStatusClass(day.id, d);
+      html += `<div class="cal-day ${statusCls}" id="d-${day.id}">`;
+      html += `<button class="reset-btn" onclick="resetDay('${day.id}',event)" title="Reset day">↺</button>`;
+      html += `<div class="cal-date">${day.label}${day.vacation ? ' <span title="Vacation">' + day.vacation + '</span>' : ''}</div>`;
+      if (day.restOnly) {
+        const extras = d['extra_' + day.id] || [];
+        const replacer = extras.find(ex => ex.replacesHikeRest);
+        if (replacer) {
+          const exState = d['exstatus_' + day.id + '_' + replacer.fromId] || {};
+          html += extraPillHTML(day.id, replacer, exState, d);
+          extras.filter(ex => !ex.replacesHikeRest).forEach(ex => {
+            html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d);
+          });
+        } else {
+          html += hikeRestPillHTML(day.id, 'Rest', d);
+          const stillRest = isStillHikeRest(day.id, d, true);
+          html += segControls(day.id, state, false, stillRest);
+          extras.forEach(ex => html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d));
+        }
+      } else if (day.hikeRest) {
+        const extras = d['extra_' + day.id] || [];
+        const replacer = extras.find(ex => ex.replacesHikeRest);
+        if (replacer) {
+          const exState = d['exstatus_' + day.id + '_' + replacer.fromId] || {};
+          html += extraPillHTML(day.id, replacer, exState, d);
+          extras.filter(ex => !ex.replacesHikeRest).forEach(ex => {
+            html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d);
+          });
+        } else {
+          html += hikeRestPillHTML(day.id, 'Hike / rest', d);
+          const stillHike = isStillHikeRest(day.id, d, true);
+          html += segControls(day.id, state, stillHike, false);
+          extras.forEach(ex => html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d));
+        }
+      } else {
+        const isSingleWorkout = !day.workouts || day.workouts.length <= 1;
+        const hasExtras = (d['extra_' + day.id] || []).length > 0;
+        if (state.status === 'moved' && isSingleWorkout && !hasExtras) {
+          // Only workout moved away, nothing left — show rest pill
+          html += `<span class="cal-event ev-hike">Rest</span>`;
+          html += segControls(day.id, state, false);
+        } else if (state.status === 'moved' && isSingleWorkout && hasExtras) {
+          // Only workout moved away, but extras remain — show only extras, skip original pill
+          html += segControls(day.id, state, false);
+        } else {
+          html += pillsHTML(day.workouts, day.id, d);
+          html += segControls(day.id, state, false);
+        }
+        // Extra workouts moved onto this day
+        const extras = d['extra_' + day.id] || [];
+        extras.forEach(ex => {
+          const exState = (d['exstatus_' + day.id + '_' + ex.fromId] || {});
+          html += extraPillHTML(day.id, ex, exState, d);
+        });
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  cal.innerHTML = html;
+}
+
+function renderMobile(d) {
+  const cal = document.getElementById('mobile-cal');
+  let html = '';
+  WEEKS.forEach(week => {
+    html += `<div class="week-block"><div class="week-header">${week.label}</div>`;
+    week.days.forEach(day => {
+      const state = getDayState(day.id, d);
+      const statusCls = cellStatusClass(day.id, d);
+      html += `<div class="week-row ${statusCls}" id="m-${day.id}">`;
+      html += `<div class="week-dow">${day.dow}</div><div class="week-date">${day.date}${day.vacation ? ' ' + day.vacation : ''}</div>`;
+      html += `<div class="week-events">`;
+      if (day.restOnly) {
+        const extras = d['extra_' + day.id] || [];
+        const replacer = extras.find(ex => ex.replacesHikeRest);
+        if (replacer) {
+          const exState = d['exstatus_' + day.id + '_' + replacer.fromId] || {};
+          html += `<span class="week-pill ${replacer.cls}">${replacer.label}</span>`;
+          html += `<div class="week-seg-toggle" style="margin-top:4px;">
+            <div class="week-seg-btn ${exState.status==='done'?'active-done':''}" onclick="setExtraStatus('${day.id}','${replacer.fromId}','done')"><span class="css-done"></span> Done</div>
+            <div class="seg-divider" style="height:18px;"></div>
+            <div class="week-seg-btn ${exState.status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${day.id}','${replacer.fromId}','skipped')"><span class="css-skip"></span> Skipped</div>
+          </div>`;
+        } else {
+          html += hikeRestWeekPillHTML(day.id, 'Rest', d);
+          const stillRest = isStillHikeRest(day.id, d, true);
+          html += weekSegControls(day.id, state, false, stillRest);
+        }
+      } else if (day.hikeRest) {
+        const extras = d['extra_' + day.id] || [];
+        const replacer = extras.find(ex => ex.replacesHikeRest);
+        if (replacer) {
+          const exState = d['exstatus_' + day.id + '_' + replacer.fromId] || {};
+          html += `<span class="week-pill ${replacer.cls}">${replacer.label}</span>`;
+          html += `<div class="week-seg-toggle" style="margin-top:4px;">
+            <div class="week-seg-btn ${exState.status==='done'?'active-done':''}" onclick="setExtraStatus('${day.id}','${replacer.fromId}','done')"><span class="css-done"></span> Done</div>
+            <div class="seg-divider" style="height:18px;"></div>
+            <div class="week-seg-btn ${exState.status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${day.id}','${replacer.fromId}','skipped')"><span class="css-skip"></span> Skipped</div>
+          </div>`;
+        } else {
+          html += hikeRestWeekPillHTML(day.id, 'Hike / rest', d);
+          const stillHike = isStillHikeRest(day.id, d, true);
+          html += weekSegControls(day.id, state, stillHike, false);
+        }
+      } else {
+        const isSingleWorkout = !day.workouts || day.workouts.length <= 1;
+        const hasExtras = (d['extra_' + day.id] || []).length > 0;
+        if (state.status === 'moved' && isSingleWorkout && !hasExtras) {
+          html += `<span class="week-pill ev-hike">Rest</span>`;
+          html += weekSegControls(day.id, state, false);
+        } else if (state.status === 'moved' && isSingleWorkout && hasExtras) {
+          html += weekSegControls(day.id, state, false);
+        } else {
+          html += weekPillsHTML(day.workouts, day.id, d);
+          html += weekSegControls(day.id, state, false);
+        }
+      }
+      // Extra workouts on this day
+      const extras = d['extra_' + day.id] || [];
+      extras.filter(ex => !ex.replacesHikeRest).forEach(ex => {
+        const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
+        const status = exState.status || '';
+        const fromDay = PLAN_MAP[ex.fromId];
+        const fromLabel = fromDay ? `${fromDay.dow} ${fromDay.date}` : ex.fromId;
+        html += `<div style="border-top:0.5px solid rgba(0,0,0,0.08);margin-top:4px;padding-top:4px;">
+          <div style="font-size:10px;color:#A0AABB;margin-bottom:2px;">from ${fromLabel}</div>
+          <span class="week-pill ${ex.cls}">${ex.label}</span>
+          <div class="week-seg-toggle" style="margin-top:4px;">
+            <div class="week-seg-btn ${status==='done'?'active-done':''}" onclick="setExtraStatus('${day.id}','${ex.fromId}','done')"><span class="css-done"></span> Done</div>
+            <div class="seg-divider" style="height:18px;"></div>
+            <div class="week-seg-btn ${status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${day.id}','${ex.fromId}','skipped')"><span class="css-skip"></span> Skipped</div>
+          </div>
+        </div>`;
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+  cal.innerHTML = html;
+}
+
+function showControls(id) {
+  const ctrl = document.getElementById('ctrl-' + id);
+  if (ctrl) { ctrl.style.display = 'flex'; ctrl.previousElementSibling.style.display = 'none'; }
+}
+
+// ── Actions ───────────────────────────────────────────────
+function setStatus(id, status) {
+  if (!status) return;
+  const d = load(); d[id] = d[id] || {}; d[id].status = status; save(d);
+  if (status === 'done' || status === 'hike') launchFireworks();
+  render();
+}
+
+
+function resetDay(id, e) {
+  e.stopPropagation();
+  const d = load();
+  // If this day was moved, clear the extra on the destination
+  if (d[id] && d[id].status === 'moved' && d[id].movedTo) {
+    const toId = d[id].movedTo;
+    d['extra_' + toId] = (d['extra_' + toId] || []).filter(ex => ex.fromId !== id);
+    delete d['exstatus_' + toId + '_' + id];
+  }
+  delete d[id];
+  delete d['edits_' + id];
+  // Clear any extras that came from other days to this day
+  delete d['extra_' + id];
+  save(d); render();
+}
+
+// ── Fireworks ─────────────────────────────────────────────
+const fwCanvas = document.createElement('canvas');
+fwCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none;';
+document.body.appendChild(fwCanvas);
+const fwCtx = fwCanvas.getContext('2d');
+let fwParticles = [], fwAnimId = null;
+
+function fwColor() {
+  const c = ['#D4887A','#5A7FA8','#C8DDB8','#D888C8','#FAF0C0','#90A8C0','#E8C8B8','#A898D8','#D0D8E0','#E85A45','#2E6FAF','#7ABF3A','#F5C800','#28B463'];
+  return c[Math.floor(Math.random()*c.length)];
+}
+function fwBurst(x,y) {
+  for (let i=0;i<80;i++) {
+    const a=(Math.PI*2/80)*i+(Math.random()-.5)*.3, s=3+Math.random()*6;
+    fwParticles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,alpha:1,radius:2+Math.random()*3,color:fwColor(),decay:.012+Math.random()*.01,gravity:.08});
+  }
+}
+function fwSparkle() {
+  for (let i=0;i<40;i++) {
+    fwParticles.push({x:Math.random()*fwCanvas.width,y:Math.random()*fwCanvas.height*.8,vx:(Math.random()-.5)*.4,vy:-.2-Math.random()*.4,alpha:.9+Math.random()*.1,radius:1.5+Math.random()*2.5,color:fwColor(),decay:.002+Math.random()*.003,gravity:0,sparkle:true,twinkle:Math.random()*Math.PI*2});
+  }
+}
+function fwAnimate() {
+  fwCtx.clearRect(0,0,fwCanvas.width,fwCanvas.height);
+  fwParticles=fwParticles.filter(p=>p.alpha>.01);
+  for (const p of fwParticles) {
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.gravity; p.vx*=.98; p.alpha-=p.decay;
+    if (p.sparkle) {
+      p.twinkle+=.12; const r=p.radius*(.7+.3*Math.sin(p.twinkle));
+      fwCtx.save(); fwCtx.globalAlpha=p.alpha; fwCtx.fillStyle=p.color; fwCtx.translate(p.x,p.y);
+      fwCtx.beginPath();
+      for (let i=0;i<4;i++) { const a=(Math.PI/2)*i,b=a+Math.PI/4; fwCtx.lineTo(Math.cos(a)*r,Math.sin(a)*r); fwCtx.lineTo(Math.cos(b)*r*.4,Math.sin(b)*r*.4); }
+      fwCtx.closePath(); fwCtx.fill(); fwCtx.restore();
+    } else {
+      fwCtx.beginPath(); fwCtx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+      fwCtx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,'0'); fwCtx.fill();
+    }
+  }
+  if (fwParticles.length>0) fwAnimId=requestAnimationFrame(fwAnimate);
+  else fwCanvas.style.display='none';
+}
+function launchFireworks() {
+  fwCanvas.width=window.innerWidth; fwCanvas.height=window.innerHeight;
+  fwCanvas.style.display='block'; fwParticles=[];
+  if (fwAnimId) cancelAnimationFrame(fwAnimId);
+  const cx=fwCanvas.width/2,cy=fwCanvas.height/2;
+  fwBurst(cx,cy);
+  setTimeout(()=>{fwBurst(cx-100,cy-50);fwAnimate();},150);
+  setTimeout(()=>fwBurst(cx+100,cy-50),300);
+  setTimeout(()=>fwSparkle(),400);
+  fwAnimate();
+}
+
+// ── Init ──────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
