@@ -171,14 +171,10 @@
 <div class="container">
   <h1>Workout Calendar 2026</h1>
 
-  <div id="progress-tracker" style="display:none;margin-bottom:1.25rem;">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-      <span id="tracker-label" style="font-size:13px;color:#888780;">0 of 35 workouts complete</span>
-      <span id="tracker-pct" style="font-size:13px;color:#90B870;">0%</span>
-    </div>
-    <div style="background:#f0efe8;border-radius:99px;height:6px;">
-      <div id="tracker-bar" style="background:#90B870;height:6px;border-radius:99px;width:0%;transition:width 0.4s ease;"></div>
-    </div>
+  <div id="progress-tracker" style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;">
+    <span id="stat-workouts" style="font-size:11px;font-weight:500;color:#3A4A28;background:#E8EDE0;border:1px solid #A8BF90;border-radius:3px;padding:2px 8px;"></span>
+    <span id="stat-skipped" style="font-size:11px;font-weight:500;color:#602010;background:#EDE0DC;border:1px solid #C0A098;border-radius:3px;padding:2px 8px;"></span>
+    <span id="stat-rest" style="font-size:11px;font-weight:500;color:#2A3040;background:#E0E4E8;border:1px solid #A0AABB;border-radius:3px;padding:2px 8px;"></span>
   </div>
   <button class="clear-btn" onclick="exportProgress()">↑ Export progress</button>
 
@@ -200,8 +196,8 @@
   <div class="legend">
     <span class="leg-item"><span class="leg-dot" style="background:#7A98A8;border:1px solid #5A7888;"></span>Strength</span>
     <span class="leg-item"><span class="leg-dot" style="background:#C8785A;border:1px solid #A05840;"></span>Run</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#C8A85A;border:1px solid #A08038;"></span>Walk, Yoga, Mobility</span>
     <span class="leg-item"><span class="leg-dot" style="background:#6A9878;border:1px solid #4A7858;"></span>Hike, Rest</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#C8A85A;border:1px solid #A08038;"></span>Walk, Yoga, Mobility</span>
   </div>
   <div class="legend">
     <span class="leg-item"><span class="leg-dot" style="background:#E8EDE0;border:1px solid #A8BF90;"></span>Done</span>
@@ -1166,39 +1162,37 @@ function checkPillOverflow() {
 }
 
 function updateTracker(d) {
-  const today = new Date();
-  const todayDate = new Date(2026, today.getMonth(), today.getDate());
+  let workouts = 0;
+  let rests = 0;
+  let skipped = 0;
 
-  let total = 0;
-  let completed = 0;
-
-  // Count weekday workouts up to and including today
-  PLAN.filter(p => p.dow !== 'Sat' && p.dow !== 'Sun').forEach(day => {
-    const dayDate = planDateFor(day);
-    if (!dayDate || dayDate > todayDate) return;
-    total++;
+  PLAN.forEach(day => {
     const state = d[day.id] || {};
-    if (state.status === 'done') completed++;
-    // Count extra workouts received on this day that are marked done
+    const status = state.status;
+
+    if (day.hikeRest || day.restOnly) {
+      // Hike/rest days
+      if (status === 'hike') workouts++;
+      else if (status === 'rest') rests++;
+    } else if (day.workouts) {
+      // Workout days
+      if (status === 'done') workouts++;
+      else if (status === 'skipped') skipped++;
+      else if (status === 'moved') rests++; // treated as rest
+    }
+
+    // Count extra workouts on this day
     const extras = d['extra_' + day.id] || [];
     extras.forEach(ex => {
       const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
-      if (exState.status === 'done') completed++;
+      if (exState.status === 'done') workouts++;
+      else if (exState.status === 'skipped') skipped++;
     });
   });
 
-  // Add weekend hikes to both total and completed (only up to today)
-  PLAN.filter(p => p.dow === 'Sat' || p.dow === 'Sun').forEach(day => {
-    const dayDate = planDateFor(day);
-    if (!dayDate || dayDate > todayDate) return;
-    const state = d[day.id] || {};
-    if (state.status === 'hike') { total++; completed++; }
-  });
-
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  document.getElementById('tracker-label').textContent = completed + ' of ' + total + ' workouts complete';
-  document.getElementById('tracker-bar').style.width = pct + '%';
-  document.getElementById('tracker-pct').textContent = pct + '%';
+  document.getElementById('stat-workouts').textContent = `${workouts} completed`;
+  document.getElementById('stat-rest').textContent = `${rests} rest day${rests !== 1 ? 's' : ''}`;
+  document.getElementById('stat-skipped').textContent = `${skipped} skipped`;
 }
 
 function getDayState(id, d) {
