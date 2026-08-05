@@ -406,6 +406,15 @@ function exportProgress() {
     const parts = [];
     if (state.status) parts.push('Status: ' + state.status.toUpperCase());
 
+    // Extra workouts received on this day
+    const extras = d['extra_' + day.id] || [];
+    extras.forEach(ex => {
+      const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
+      const fromDay = PLAN_MAP[ex.fromId];
+      const fromLabel = fromDay ? `${fromDay.dow} ${fromDay.date}` : ex.fromId;
+      if (exState.status) parts.push(`Moved from ${fromLabel} (${ex.label}) — Status: ${exState.status.toUpperCase()}`);
+    });
+
     if (parts.length > 0) {
       const dayLabel = day.dow + ' ' + day.label + (day.hikeRest ? ' (Hike/Rest)' : day.workouts ? ' (' + day.workouts.map(w => w.lines[0]).join(', ') + ')' : '');
       lines.push('');
@@ -1202,12 +1211,13 @@ function updateTracker(d) {
     if (day.hikeRest || day.restOnly) {
       // Hike/rest days
       if (status === 'hike') workouts++;
+      else if (status === 'done') workouts++; // workout moved onto this day and completed
       else if (status === 'rest') rests++;
     } else if (day.workouts) {
       // Workout days
       if (status === 'done') workouts++;
       else if (status === 'skipped') skipped++;
-      else if (status === 'moved') rests++; // treated as rest
+      // moved: counts on destination day via extras, not here
     }
 
     // Count extra workouts on this day
