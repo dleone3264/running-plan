@@ -1217,14 +1217,16 @@ function updateTracker(d) {
       // Workout days
       if (status === 'done') workouts++;
       else if (status === 'skipped') skipped++;
-      // moved: counts on destination day via extras, not here
+      else if (status === 'moved') rests++;
     }
 
     // Count extra workouts on this day
     const extras = d['extra_' + day.id] || [];
     extras.forEach(ex => {
       const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
-      if (exState.status === 'done') workouts++;
+      // Count as done if explicitly marked, OR if the day itself is marked done and no explicit status
+      const dayDone = status === 'done';
+      if (exState.status === 'done' || (exState.status === undefined && dayDone)) workouts++;
       else if (exState.status === 'skipped') skipped++;
     });
   });
