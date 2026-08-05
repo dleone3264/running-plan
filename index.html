@@ -48,11 +48,11 @@
     .cal-day.status-moved   { background: #E0E4E8; border-color: #A0AABB; }
     .week-row.status-moved  { background: #E0E4E8; }
     /* Hide seg-toggle when status is set — workout pills stay visible */
-    .cal-day.status-done .seg-wrap,
-    .cal-day.status-skipped .seg-wrap,
-    .cal-day.status-hike .seg-wrap,
-    .cal-day.status-rest .seg-wrap,
-    .cal-day.status-moved .seg-wrap { display: none; }
+    .cal-day.status-done > .seg-wrap,
+    .cal-day.status-skipped > .seg-wrap,
+    .cal-day.status-hike > .seg-wrap,
+    .cal-day.status-rest > .seg-wrap,
+    .cal-day.status-moved > .seg-wrap { display: none; }
     .css-moved { display:inline-block; font-size:11px; color:#8AAABB; vertical-align:middle; line-height:1; }
     .moved-pill { font-size:10px; color:#8AAABB; margin-top:3px; display:block; }
     /* Race clock */
@@ -1224,7 +1224,6 @@ function updateTracker(d) {
     const extras = d['extra_' + day.id] || [];
     extras.forEach(ex => {
       const exState = d['exstatus_' + day.id + '_' + ex.fromId] || {};
-      // Count as done if explicitly marked, OR if the day itself is marked done and no explicit status
       const dayDone = status === 'done';
       if (exState.status === 'done' || (exState.status === undefined && dayDone)) workouts++;
       else if (exState.status === 'skipped') skipped++;
