@@ -552,7 +552,7 @@ function openHikeRestEditor(id, pillEl) {
   editor.className = 'pill-editor';
   editor.innerHTML = `
     <div class="pill-editor-label">Label</div>
-    <input id="pe-hr-label" value="${label.replace(/"/g,'&quot;')}" placeholder="e.g. Hike / rest" />
+    <input id="pe-hr-label" value="${label.replace(/"/g,'&quot;')}" placeholder="e.g. Hike/rest" />
     <div class="pill-editor-label">Notes</div>
     <textarea id="pe-hr-notes" placeholder="Optional notes...">${notes}</textarea>
     <div class="pill-editor-btns">
@@ -1009,12 +1009,41 @@ function openRaceClock(id) {
   setTimeout(() => { const el = document.getElementById('rc-' + id); if (el) el.focus(); }, 50);
 }
 
+const BASELINE_5K = '34:40'; // starting PR
+
+function timeToSeconds(val) {
+  if (!val) return Infinity;
+  const parts = String(val).split(':').map(Number);
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return Infinity;
+}
+
+function getBestTime(d, excludeId) {
+  let best = timeToSeconds(BASELINE_5K);
+  RACE_DAY_IDS.forEach(id => {
+    if (id === excludeId) return;
+    const t = (d[id] || {}).raceTime;
+    if (t) best = Math.min(best, timeToSeconds(t));
+  });
+  return best;
+}
+
 function saveRaceTime(id) {
   const input = document.getElementById('rc-' + id);
   if (!input) return;
   const val = input.value.trim();
   if (!val) return;
-  const d = load(); d[id] = d[id] || {}; d[id].raceTime = val; save(d); render();
+  const d = load();
+  const prevBestSecs = getBestTime(d, id);
+  const newTime = timeToSeconds(val);
+  // Reconstruct prevBest as mm:ss string
+  const prevMins = Math.floor(prevBestSecs / 60);
+  const prevSecs = prevBestSecs % 60;
+  const prevStr = `${prevMins}:${String(prevSecs).padStart(2,'0')}`;
+  d[id] = d[id] || {}; d[id].raceTime = val; save(d);
+  if (newTime < prevBestSecs) launchPRCelebration(val, prevStr);
+  else render();
 }
 
 // ── Controls ──────────────────────────────────────────────
@@ -1265,7 +1294,7 @@ function renderDesktop(d) {
             html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d);
           });
         } else {
-          html += hikeRestPillHTML(day.id, 'Hike / rest', d);
+          html += hikeRestPillHTML(day.id, 'Hike/rest', d);
           const stillHike = isStillHikeRest(day.id, d, true);
           html += segControls(day.id, state, stillHike, false);
           extras.forEach(ex => html += extraPillHTML(day.id, ex, d['exstatus_' + day.id + '_' + ex.fromId] || {}, d));
@@ -1337,7 +1366,7 @@ function renderMobile(d) {
             <div class="week-seg-btn ${exState.status==='skipped'?'active-skip':''}" onclick="setExtraStatus('${day.id}','${replacer.fromId}','skipped')"><span class="css-skip"></span> Skipped</div>
           </div>`;
         } else {
-          html += hikeRestWeekPillHTML(day.id, 'Hike / rest', d);
+          html += hikeRestWeekPillHTML(day.id, 'Hike/rest', d);
           const stillHike = isStillHikeRest(day.id, d, true);
           html += weekSegControls(day.id, state, stillHike, false);
         }
@@ -1406,6 +1435,48 @@ function resetDay(id, e) {
   // Clear any extras that came from other days to this day
   delete d['extra_' + id];
   save(d); render();
+}
+
+function launchPRCelebration(newTime, prevTime) {
+  render();
+  for (let i = 0; i < 4; i++) {
+    setTimeout(() => launchFireworks(), i * 400);
+  }
+
+  // Calculate improvement
+  const diff = timeToSeconds(prevTime) - timeToSeconds(newTime);
+  const diffMins = Math.floor(diff / 60);
+  const diffSecs = diff % 60;
+  const diffStr = diffMins > 0 ? `${diffMins}:${String(diffSecs).padStart(2,'0')}` : `0:${String(diffSecs).padStart(2,'0')}`;
+
+  const banner = document.createElement('div');
+  banner.id = 'pr-banner';
+  banner.style.cssText = `
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.35);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;opacity:0;transition:opacity 0.3s;cursor:pointer;`;
+  banner.innerHTML = `
+    <div style="background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.11);border-radius:12px;padding:24px 28px;text-align:center;max-width:240px;transform:scale(0.9);transition:transform 0.3s;font-family:'Poppins',sans-serif;letter-spacing:-0.05em;">
+      <div style="font-size:52px;margin-bottom:10px;">🏅</div>
+      <div style="font-size:10px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Personal best</div>
+      <div style="font-size:34px;font-weight:600;color:#C8785A;letter-spacing:-0.05em;line-height:1;margin-bottom:4px;">${newTime}</div>
+      <div style="font-size:12px;color:#6A8858;font-weight:500;">↓ ${diffStr} faster</div>
+      <div style="font-size:10px;color:#aaa;margin-top:8px;">previous · ${prevTime}</div>
+    </div>`;
+  document.body.appendChild(banner);
+  banner.addEventListener('click', () => {
+    banner.style.opacity = '0';
+    setTimeout(() => banner.remove(), 300);
+  });
+  requestAnimationFrame(() => {
+    banner.style.opacity = '1';
+    banner.querySelector('div').style.transform = 'scale(1)';
+  });
+  setTimeout(() => {
+    banner.style.opacity = '0';
+    setTimeout(() => banner.remove(), 300);
+  }, 5000);
 }
 
 // ── Fireworks ─────────────────────────────────────────────
