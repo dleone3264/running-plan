@@ -62,6 +62,11 @@
     .race-clock-input { background: transparent; border: none; font-family: 'Share Tech Mono', monospace; font-size: 20px; color: #C8785A; text-align: center; width: 80px; outline: none; letter-spacing: 0.05em; }
     .race-clock-input::placeholder { color: #555; }
     .race-clock-save { font-size: 9px; color: #C8785A; background: none; border: 0.5px solid #555; border-radius: 3px; padding: 2px 6px; cursor: pointer; margin-top: 4px; }
+    /* Info button */
+    .pill-info-btn { font-size:8px; background:rgba(255,255,255,0.25); border:0.5px solid rgba(255,255,255,0.6); border-radius:50%; width:11px; height:11px; color:#fff !important; -webkit-text-fill-color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700; line-height:1; padding:0; vertical-align:middle; position:relative; }
+    .pill-info-btn:hover .pill-tooltip, .pill-info-btn:focus .pill-tooltip { display:none; } /* handled by JS */
+    .pill-tooltip { display:none; position:fixed; font-size:11px; font-weight:400; border-radius:5px; padding:8px 10px; width:200px; z-index:9999; line-height:1.6; white-space:normal; pointer-events:none; box-shadow:0 2px 8px rgba(0,0,0,0.2); background:#3A3830 !important; color:#f0efe8 !important; border:none !important; }
+
     .pill-editor { background: #fff; border: 1px solid #B0A898; border-radius: 5px; padding: 5px 6px; margin-bottom: 3px; display: flex; flex-direction: column; gap: 4px; }
     .pill-editor input, .pill-editor textarea { font-family: 'Poppins', sans-serif; font-size: 11px; border: 0.5px solid rgba(0,0,0,0.15); border-radius: 3px; padding: 3px 5px; width: 100%; color: #111110; background: #faf9f6; resize: none; }
     .pill-editor textarea { height: 44px; }
@@ -187,10 +192,10 @@
 
   <div class="section-title" style="display:none;">Treadmill pace reference (based on 34:40 5k)</div>
   <div class="pace-grid" style="display:none;">
-    <div class="pace-card"><div class="pace-label">Easy / recovery</div><div class="pace-val">12:00–13:20 /mi</div><div class="pace-sub">4.5–5.0 mph · 1% incline</div></div>
-    <div class="pace-card"><div class="pace-label">Strides</div><div class="pace-val">9:40–10:20 /mi</div><div class="pace-sub">5.8–6.2 mph · 20 sec on · 90 sec walk</div></div>
-    <div class="pace-card"><div class="pace-label">Hill repeats</div><div class="pace-val">12:00–12:30 /mi</div><div class="pace-sub">4.8–5.0 mph · 6% → 8% incline</div></div>
-    <div class="pace-card"><div class="pace-label">Tempo</div><div class="pace-val">10:42–11:19 /mi</div><div class="pace-sub">5.3–5.6 mph · 1% incline</div></div>
+    <div class="pace-card"><div class="pace-label">Easy / recovery</div><div class="pace-val">12:00–13:20 /mi</div><div class="pace-sub">4.5–5.0 mph<br>1% incline</div></div>
+    <div class="pace-card"><div class="pace-label">Strides</div><div class="pace-val">9:40–10:20 /mi</div><div class="pace-sub">5.8–6.2 mph<br>20 sec on<br>90 sec walk</div></div>
+    <div class="pace-card"><div class="pace-label">Hill repeats</div><div class="pace-val">12:00–12:30 /mi</div><div class="pace-sub">4.8–5.0 mph<br>6% → 8% incline</div></div>
+    <div class="pace-card"><div class="pace-label">Tempo</div><div class="pace-val">10:42–11:19 /mi</div><div class="pace-sub">5.3–5.6 mph<br>1% incline</div></div>
   </div>
 
   <div class="legend">
@@ -245,7 +250,7 @@
 const PLAN = [
   // WEEK 1
   { id:'jun22', date:'22', dow:'Mon', label:'22', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jun23', date:'23', dow:'Tue', label:'23', workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'jun23', date:'23', dow:'Tue', label:'23', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min'}] },
   { id:'jun24', date:'24', dow:'Wed', label:'24', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jun25', date:'25', dow:'Thu', label:'25', workouts:[{cls:'ev-strength', lines:['Strength']}] },
   { id:'jun26', date:'26', dow:'Fri', label:'26', workouts:[{cls:'ev-run', lines:['Hills 4× / 6%'], total:'~25 min'}] },
@@ -253,7 +258,7 @@ const PLAN = [
   { id:'jun28', date:'28', dow:'Sun', label:'28', hikeRest:true },
   // WEEK 2
   { id:'jun29', date:'29', dow:'Mon', label:'29', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jun30', date:'30', dow:'Tue', label:'30', workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'jun30', date:'30', dow:'Tue', label:'30', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min'}] },
   { id:'jul1',  date:'1',  dow:'Wed', label:'1',  workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jul2',  date:'2',  dow:'Thu', label:'2',  workouts:[{cls:'ev-strength', lines:['Strength']}] },
   { id:'jul3',  date:'3',  dow:'Fri', label:'3',  workouts:[{cls:'ev-run', lines:['Hills 4× / 6%'], total:'~25 min'}] },
@@ -261,100 +266,100 @@ const PLAN = [
   { id:'jul5',  date:'5',  dow:'Sun', label:'5',  hikeRest:true },
   // WEEK 3
   { id:'jul6',  date:'6',  dow:'Mon', label:'6', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul7',  date:'7',  dow:'Tue', label:'7',  workouts:[{cls:'ev-run', lines:['Easy + Strides 4×'], total:'~25 min'}] },
+  { id:'jul7',  date:'7',  dow:'Tue', label:'7',  workouts:[{cls:'ev-run', lines:['Run'], total:'~25 min'}] },
   { id:'jul8',  date:'8',  dow:'Wed', label:'8',  workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jul9',  date:'9',  dow:'Thu', label:'9',  workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul10', date:'10', dow:'Fri', label:'10', workouts:[{cls:'ev-run', lines:['Easy run'], total:'40 min'}] },
+  { id:'jul10', date:'10', dow:'Fri', label:'10', workouts:[{cls:'ev-run', lines:['Run'], total:'40 min'}] },
   { id:'jul11', date:'11', dow:'Sat', label:'11', hikeRest:true },
   { id:'jul12', date:'12', dow:'Sun', label:'12', hikeRest:true },
   // WEEK 4
   { id:'jul13', date:'13', dow:'Mon', label:'13', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul14', date:'14', dow:'Tue', label:'14', workouts:[{cls:'ev-run', lines:['Easy run'], total:'35 min'}] },
+  { id:'jul14', date:'14', dow:'Tue', label:'14', workouts:[{cls:'ev-run', lines:['Run'], total:'35 min'}] },
   { id:'jul15', date:'15', dow:'Wed', label:'15', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jul16', date:'16', dow:'Thu', label:'16', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul17', date:'17', dow:'Fri', label:'17', workouts:[{cls:'ev-run', lines:['Tempo run'], total:'25 min'}] },
+  { id:'jul17', date:'17', dow:'Fri', label:'17', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min'}] },
   { id:'jul18', date:'18', dow:'Sat', label:'18', hikeRest:true },
   { id:'jul19', date:'19', dow:'Sun', label:'19', hikeRest:true },
   // WEEK 5
   { id:'jul20', date:'20', dow:'Mon', label:'20', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul21', date:'21', dow:'Tue', label:'21', workouts:[{cls:'ev-run', lines:['Easy run'], total:'25 min'}] },
+  { id:'jul21', date:'21', dow:'Tue', label:'21', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min'}] },
   { id:'jul22', date:'22', dow:'Wed', label:'22', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jul23', date:'23', dow:'Thu', label:'23', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul24', vacation:'🏕️', date:'24', dow:'Fri', label:'24', workouts:[{cls:'ev-run', lines:['Easy run'], total:'45 min'}] },
+  { id:'jul24', vacation:'🏕️', date:'24', dow:'Fri', label:'24', workouts:[{cls:'ev-run', lines:['Run'], total:'45 min'}] },
   { id:'jul25', vacation:'🏕️', date:'25', dow:'Sat', label:'25', hikeRest:true },
   { id:'jul26', vacation:'🏕️', date:'26', dow:'Sun', label:'26', hikeRest:true },
   // WEEK 6
   { id:'jul27', date:'27', dow:'Mon', label:'27', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul28', date:'28', dow:'Tue', label:'28', workouts:[{cls:'ev-run', lines:['Easy + Strides 6×'], total:'~30 min'}] },
+  { id:'jul28', date:'28', dow:'Tue', label:'28', workouts:[{cls:'ev-run', lines:['Run'], total:'~30 min'}] },
   { id:'jul29', date:'29', dow:'Wed', label:'29', workouts:[{cls:'ev-yoga', lines:['Yoga']}] },
   { id:'jul30', date:'30', dow:'Thu', label:'30', workouts:[{cls:'ev-strength', lines:['Strength']}] },
-  { id:'jul31', date:'31', dow:'Fri', label:'31', workouts:[{cls:'ev-run', lines:['Easy run'], total:'20 min'}] },
+  { id:'jul31', date:'31', dow:'Fri', label:'31', workouts:[{cls:'ev-run', lines:['Run'], total:'20 min'}] },
   { id:'aug1',  date:'1',  dow:'Sat', label:'1',  hikeRest:true },
-  { id:'aug2',  date:'2',  dow:'Sun', label:'2 🎉',  workouts:[{cls:'ev-run', lines:['5k Race'], total:'~31–34 min goal'}] },
+  { id:'aug2',  date:'2',  dow:'Sun', label:'2 🎉',  workouts:[{cls:'ev-run', lines:['5k Race'], total:'31–34 min'}] },
   // WEEK 7
   { id:'aug3',  date:'3',  dow:'Mon', label:'3', hikeRest:true, restOnly:true },
   { id:'aug4',  date:'4',  dow:'Tue', label:'4',  workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
   { id:'aug5',  date:'5',  dow:'Wed', label:'5',  workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'aug6',  date:'6',  dow:'Thu', label:'6',  workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'aug7',  date:'7',  dow:'Fri', label:'7',  workouts:[{cls:'ev-run', lines:['Easy run'], total:'30 min'}] },
+  { id:'aug7',  date:'7',  dow:'Fri', label:'7',  workouts:[{cls:'ev-run', lines:['Run'], total:'30 min'}] },
   { id:'aug8',  date:'8',  dow:'Sat', label:'8',  hikeRest:true },
   // Extended plan: Aug 9 – Oct 3
   { id:'aug9', date:'9', dow:'Sun', label:'9', hikeRest:true },
   { id:'aug10', date:'10', dow:'Mon', label:'10', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'aug11', date:'11', dow:'Tue', label:'11', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug11', date:'11', dow:'Tue', label:'11', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min', info:'Easy 12:00–13:00/mi<br>4×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'aug12', date:'12', dow:'Wed', label:'12', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'aug13', date:'13', dow:'Thu', label:'13', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'aug14', vacation:'🏕️', date:'14', dow:'Fri', label:'14', workouts:[{cls:'ev-run', lines:['Runna']}] },
-  { id:'aug15', vacation:'🏕️', date:'15', dow:'Sat', label:'15', hikeRest:true },
-  { id:'aug16', vacation:'🏕️', date:'16', dow:'Sun', label:'16', hikeRest:true },
+  { id:'aug14', date:'14', dow:'Fri', label:'14', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min', info:'Comfortable conversational pace<br>12:00–13:00/mi'}] },
+  { id:'aug15', date:'15', dow:'Sat', label:'15', hikeRest:true },
+  { id:'aug16', date:'16', dow:'Sun', label:'16', hikeRest:true },
   { id:'aug17', date:'17', dow:'Mon', label:'17', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'aug18', date:'18', dow:'Tue', label:'18', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug18', date:'18', dow:'Tue', label:'18', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min', info:'Easy 12:00–13:00/mi<br>4×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'aug19', date:'19', dow:'Wed', label:'19', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'aug20', date:'20', dow:'Thu', label:'20', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'aug21', date:'21', dow:'Fri', label:'21', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug21', date:'21', dow:'Fri', label:'21', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min', info:'Comfortable conversational pace<br>12:00–13:00/mi'}] },
   { id:'aug22', date:'22', dow:'Sat', label:'22', hikeRest:true },
   { id:'aug23', date:'23', dow:'Sun', label:'23', hikeRest:true },
   { id:'aug24', date:'24', dow:'Mon', label:'24', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'aug25', date:'25', dow:'Tue', label:'25', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug25', date:'25', dow:'Tue', label:'25', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min', info:'Easy 12:00–13:00/mi<br>6×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'aug26', date:'26', dow:'Wed', label:'26', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'aug27', vacation:'🏕️', date:'27', dow:'Thu', label:'27', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'aug28', vacation:'🏕️', date:'28', dow:'Fri', label:'28', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'aug28', vacation:'🏕️', date:'28', dow:'Fri', label:'28', workouts:[{cls:'ev-run', lines:['Run'], total:'~30 min', info:'10 min easy warmup<br>3×5 min at 10:45–11:15/mi<br>90sec walk recovery<br>5 min cooldown'}] },
   { id:'aug29', vacation:'🏕️', date:'29', dow:'Sat', label:'29', hikeRest:true },
   { id:'aug30', date:'30', dow:'Sun', label:'30', hikeRest:true },
   { id:'aug31', date:'31', dow:'Mon', label:'31', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'sep1', date:'1', dow:'Tue', label:'1', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep1', date:'1', dow:'Tue', label:'1', workouts:[{cls:'ev-run', lines:['Run'], total:'25 min', info:'Easy 12:00–13:00/mi<br>6×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'sep2', date:'2', dow:'Wed', label:'2', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'sep3', date:'3', dow:'Thu', label:'3', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'sep4', vacation:'🏕️', date:'4', dow:'Fri', label:'4', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep4', vacation:'🏕️', date:'4', dow:'Fri', label:'4', workouts:[{cls:'ev-run', lines:['Run'], total:'~30 min', info:'10 min easy warmup<br>3×5 min at 10:45–11:15/mi<br>90sec walk recovery<br>5 min cooldown'}] },
   { id:'sep5', vacation:'🏕️', date:'5', dow:'Sat', label:'5', hikeRest:true },
   { id:'sep6', vacation:'🏕️', date:'6', dow:'Sun', label:'6', hikeRest:true },
   { id:'sep7', vacation:'🏕️', date:'7', dow:'Mon', label:'7', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'sep8', vacation:'🏕️', date:'8', dow:'Tue', label:'8', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep8', vacation:'🏕️', date:'8', dow:'Tue', label:'8', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min', info:'Easy 12:00–13:00/mi<br>6×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'sep9', vacation:'🏕️', date:'9', dow:'Wed', label:'9', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'sep10', vacation:'🏕️', date:'10', dow:'Thu', label:'10', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'sep11', vacation:'🏕️', date:'11', dow:'Fri', label:'11', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep11', vacation:'🏕️', date:'11', dow:'Fri', label:'11', workouts:[{cls:'ev-run', lines:['Run'], total:'~33 min', info:'10 min easy warmup<br>18–20 min at 10:45/mi<br>5 min cooldown'}] },
   { id:'sep12', vacation:'🏕️', date:'12', dow:'Sat', label:'12', hikeRest:true },
   { id:'sep13', vacation:'🏕️', date:'13', dow:'Sun', label:'13', hikeRest:true },
   { id:'sep14', date:'14', dow:'Mon', label:'14', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'sep15', date:'15', dow:'Tue', label:'15', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep15', date:'15', dow:'Tue', label:'15', workouts:[{cls:'ev-run', lines:['Run'], total:'30 min', info:'Easy 12:00–13:00/mi<br>6×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'sep16', date:'16', dow:'Wed', label:'16', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'sep17', date:'17', dow:'Thu', label:'17', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'sep18', date:'18', dow:'Fri', label:'18', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep18', date:'18', dow:'Fri', label:'18', workouts:[{cls:'ev-run', lines:['Run'], total:'~33 min', info:'10 min easy warmup<br>18–20 min at 10:45/mi<br>5 min cooldown'}] },
   { id:'sep19', date:'19', dow:'Sat', label:'19', hikeRest:true },
   { id:'sep20', date:'20', dow:'Sun', label:'20', hikeRest:true },
   { id:'sep21', date:'21', dow:'Mon', label:'21', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'sep22', date:'22', dow:'Tue', label:'22', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep22', date:'22', dow:'Tue', label:'22', workouts:[{cls:'ev-run', lines:['Run'], total:'20 min', info:'Easy 12:00–13:00/mi<br>4×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'sep23', date:'23', dow:'Wed', label:'23', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'sep24', date:'24', dow:'Thu', label:'24', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
-  { id:'sep25', vacation:'🏕️', date:'25', dow:'Fri', label:'25', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep25', vacation:'🏕️', date:'25', dow:'Fri', label:'25', workouts:[{cls:'ev-run', lines:['Run'], total:'~25 min', info:'10 min easy warmup<br>10 min at 10:45/mi<br>5 min cooldown'}] },
   { id:'sep26', vacation:'🏕️', date:'26', dow:'Sat', label:'26', hikeRest:true },
   { id:'sep27', vacation:'🏕️', date:'27', dow:'Sun', label:'27', hikeRest:true },
   { id:'sep28', date:'28', dow:'Mon', label:'28', workouts:[{cls:'ev-strength', lines:['Strength'], total:'30 min'}] },
-  { id:'sep29', date:'29', dow:'Tue', label:'29', workouts:[{cls:'ev-run', lines:['Runna']}] },
+  { id:'sep29', date:'29', dow:'Tue', label:'29', workouts:[{cls:'ev-run', lines:['Run'], total:'20 min', info:'Easy 12:00–13:00/mi<br>4×20sec strides at 9:00–9:30/mi<br>60–90 sec walk recovery between strides'}] },
   { id:'sep30', date:'30', dow:'Wed', label:'30', workouts:[{cls:'ev-yoga', lines:['Yoga'], total:'1 hr'}] },
   { id:'oct1', date:'1', dow:'Thu', label:'1', workouts:[{cls:'ev-strength', lines:['Strength'], total:'20 min'}] },
   { id:'oct2', date:'2', dow:'Fri', label:'2', hikeRest:true },
-  { id:'oct3', date:'3', dow:'Sat', label:'3 🎉', workouts:[{cls:'ev-run', lines:['5k Race'], total:'~30–32 min goal'}] },
+  { id:'oct3', date:'3', dow:'Sat', label:'3 🎉', workouts:[{cls:'ev-run', lines:['5k Race'], total:'30–32 min'}] },
 ];
 
 // Month layout: which slots are empty before first day, and which month
@@ -367,21 +372,21 @@ const MONTHS = [
 ];
 
 const WEEKS = [
-  { label:'Week 1 · Jun 22–28', days: PLAN.slice(0,7) },
-  { label:'Week 2 · Jun 29–Jul 5', days: PLAN.slice(7,14) },
-  { label:'Week 3 · Jul 6–12', days: PLAN.slice(14,21) },
-  { label:'Week 4 · Jul 13–19', days: PLAN.slice(21,28) },
-  { label:'Week 5 · Jul 20–26', days: PLAN.slice(28,35) },
-  { label:'Week 6 · Jul 27–Aug 2 · 5k Race Sunday', days: PLAN.slice(35,42) },
-  { label:'Week 7 · Aug 3–9', days: PLAN.slice(42,49) },
-  { label:'Week 8 · Aug 10–16', days: PLAN.slice(49,56) },
-  { label:'Week 9 · Aug 17–23', days: PLAN.slice(56,63) },
-  { label:'Week 10 · Aug 24–30', days: PLAN.slice(63,70) },
-  { label:'Week 11 · Aug 31–Sep 6', days: PLAN.slice(70,77) },
-  { label:'Week 12 · Sep 7–13', days: PLAN.slice(77,84) },
-  { label:'Week 13 · Sep 14–20', days: PLAN.slice(84,91) },
-  { label:'Week 14 · Sep 21–27', days: PLAN.slice(91,98) },
-  { label:'Week 15 · Sep 28–Oct 3', days: PLAN.slice(98) },
+  { label:'Week 1<br>Jun 22–28', days: PLAN.slice(0,7) },
+  { label:'Week 2<br>Jun 29–Jul 5', days: PLAN.slice(7,14) },
+  { label:'Week 3<br>Jul 6–12', days: PLAN.slice(14,21) },
+  { label:'Week 4<br>Jul 13–19', days: PLAN.slice(21,28) },
+  { label:'Week 5<br>Jul 20–26', days: PLAN.slice(28,35) },
+  { label:'Week 6<br>Jul 27–Aug 2<br>5k Race Sunday', days: PLAN.slice(35,42) },
+  { label:'Week 7<br>Aug 3–9', days: PLAN.slice(42,49) },
+  { label:'Week 8<br>Aug 10–16', days: PLAN.slice(49,56) },
+  { label:'Week 9<br>Aug 17–23', days: PLAN.slice(56,63) },
+  { label:'Week 10<br>Aug 24–30', days: PLAN.slice(63,70) },
+  { label:'Week 11<br>Aug 31–Sep 6', days: PLAN.slice(70,77) },
+  { label:'Week 12<br>Sep 7–13', days: PLAN.slice(77,84) },
+  { label:'Week 13<br>Sep 14–20', days: PLAN.slice(84,91) },
+  { label:'Week 14<br>Sep 21–27', days: PLAN.slice(91,98) },
+  { label:'Week 15<br>Sep 28–Oct 3', days: PLAN.slice(98) },
 ];
 
 // ── Storage ───────────────────────────────────────────────
@@ -450,6 +455,12 @@ function pillsHTML(workouts, id, d) {
     const total = esc(edits['total_' + wi] !== undefined ? edits['total_' + wi] : (w.total || ''));
     const notes = esc(edits['notes_' + wi] || '');
     const extra = w.lines.slice(1).map(l => `<span class="cal-event ${cls}">${l}</span>`).join('');
+    const info = w.info || '';
+    const pillBg = w.cls === 'ev-run' || w.cls === 'ev-warmcool' ? '#C8785A' :
+                   w.cls === 'ev-strength' ? '#7A98A8' :
+                   w.cls === 'ev-yoga' || w.cls === 'ev-walk' ? '#C8A85A' :
+                   w.cls === 'ev-hike' ? '#6A9878' : '#C8785A';
+    const infoBtn = info ? `<button class="pill-info-btn" onclick="event.stopPropagation()">i<div class="pill-tooltip" style="background:${pillBg};color:#fff;border-color:${pillBg};">${info}</div></button>` : '';
     const isRunna = label && label.toLowerCase().includes('runna');
     const hasSavedStats = isRunna && (runnaStats.miles || runnaStats.time);
     if (hasSavedStats) {
@@ -458,15 +469,21 @@ function pillsHTML(workouts, id, d) {
         <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;white-space:nowrap;">
           <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
         </span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:9px;">${notes}</span>` : ''}
       </span>${extra}`;
     } else if (total) {
-      html += `<span class="cal-event ${cls} pill-timed" data-editable="1" onclick="openPillEditor('${id}',${wi},this)" style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
-        <span class="pill-label" style="white-space:nowrap;">${label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${total}</span>
+      html += `<span class="cal-event ${cls} pill-timed" data-editable="1" onclick="openPillEditor('${id}',${wi},this)" style="display:flex;flex-direction:column;gap:1px;">
+        <span class="pill-row" style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="pill-label" style="display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;">${label}${infoBtn}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;flex-shrink:0;">${total}</span>
+        </span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:9px;">${notes}</span>` : ''}
       </span>${extra}`;
     } else {
-      html += `<span class="cal-event ${cls}" data-editable="1" onclick="openPillEditor('${id}',${wi},this)">${label}</span>${extra}`;
+      html += `<span class="cal-event ${cls}" data-editable="1" onclick="openPillEditor('${id}',${wi},this)" style="display:flex;flex-direction:column;gap:1px;">
+        <span style="display:flex;align-items:center;gap:3px;">${label}${infoBtn}</span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:9px;">${notes}</span>` : ''}
+      </span>${extra}`;
     }
-    if (notes) html += `<div style="font-size:10px;color:#5f5e5a;margin-top:2px;font-style:italic;">${notes}</div>`;
   });
   return html;
 }
@@ -489,15 +506,21 @@ function weekPillsHTML(workouts, id, d) {
         <span style="display:flex;justify-content:space-between;opacity:0.9;font-weight:400;">
           <span>${runnaStats.miles ? runnaStats.miles + ' mi' : ''}</span><span>${formatTimeDisplay(runnaStats.time)}</span>
         </span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:10px;">${notes}</span>` : ''}
       </span>`;
     } else if (total) {
-      html += `<span class="week-pill ${cls} pill-timed" style="display:flex;justify-content:space-between;align-items:center;gap:4px;">
-        <span class="pill-label" style="white-space:nowrap;">${label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${total}</span>
+      html += `<span class="week-pill ${cls} pill-timed" style="display:flex;flex-direction:column;gap:1px;">
+        <span class="pill-row" style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="pill-label" style="white-space:nowrap;overflow:hidden;">${label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;flex-shrink:0;">${total}</span>
+        </span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:10px;">${notes}</span>` : ''}
       </span>`;
     } else {
-      html += `<span class="week-pill ${cls}">${label}</span>`;
+      html += `<span class="week-pill ${cls}" style="display:flex;flex-direction:column;gap:1px;">
+        <span>${label}</span>
+        ${notes ? `<span style="opacity:0.85;font-weight:400;font-size:10px;">${notes}</span>` : ''}
+      </span>`;
     }
-    if (notes) html += `<div style="font-size:11px;color:#5f5e5a;margin-top:2px;font-style:italic;">${notes}</div>`;
   });
   return html;
 }
@@ -646,6 +669,11 @@ function savePillEdit(id, wi) {
   const cls = inferPillClass(label);
   if (cls) d['edits_' + id]['cls_' + wi] = cls;
   else delete d['edits_' + id]['cls_' + wi];
+  // Auto-mark as rest if label is rest
+  if (label.toLowerCase() === 'rest') {
+    d[id] = d[id] || {};
+    d[id].status = 'rest';
+  }
   save(d); render();
 }
 
@@ -790,7 +818,7 @@ function extraPillHTML(toId, ex, exState, d) {
         </span>
       </span>`;
     } else {
-      html += `<span class="cal-event ${ex.cls} pill-timed" style="display:flex;justify-content:space-between;align-items:center;gap:4px;"><span class="pill-label" style="white-space:nowrap;">${ex.label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;">${ex.total}</span></span>`;
+      html += `<span class="cal-event ${ex.cls} pill-timed" style="display:flex;justify-content:space-between;align-items:center;gap:4px;"><span class="pill-label" style="white-space:nowrap;">${ex.label}</span><span class="pill-time" style="opacity:0.9;font-weight:400;white-space:nowrap;margin-left:auto;">${ex.total}</span></span>`;
     }
   } else {
     html += `<span class="cal-event ${ex.cls}">${ex.label}</span>`;
@@ -1183,18 +1211,20 @@ function render() {
 
 function checkPillOverflow() {
   document.querySelectorAll('.pill-timed').forEach(pill => {
-    const label = pill.querySelector('.pill-label');
+    const row = pill.querySelector('.pill-row');
     const time = pill.querySelector('.pill-time');
-    if (!label || !time) return;
-    // Reset to inline
-    pill.style.flexDirection = 'row';
-    pill.style.alignItems = 'center';
-    pill.style.flexWrap = '';
-    // Check overflow
-    if (pill.scrollWidth > pill.clientWidth + 1) {
-      // Stack time below, label stays on one line
-      pill.style.flexDirection = 'column';
-      pill.style.alignItems = 'flex-start';
+    if (!row || !time) return;
+    // Reset
+    row.style.flexWrap = '';
+    time.style.textAlign = '';
+    // Check if label+time overflow the row
+    if (row.scrollWidth > row.clientWidth + 1) {
+      // Stack time below on its own right-aligned line
+      row.style.flexWrap = 'wrap';
+      time.style.width = '100%';
+      time.style.textAlign = 'right';
+    } else {
+      time.style.width = '';
     }
   });
 }
@@ -1473,7 +1503,7 @@ function launchPRCelebration(newTime, prevTime) {
       <div style="font-size:10px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Personal best</div>
       <div style="font-size:34px;font-weight:600;color:#C8785A;letter-spacing:-0.05em;line-height:1;margin-bottom:4px;">${newTime}</div>
       <div style="font-size:12px;color:#6A8858;font-weight:500;">↓ ${diffStr} faster</div>
-      <div style="font-size:10px;color:#aaa;margin-top:8px;">previous · ${prevTime}</div>
+      <div style="font-size:10px;color:#aaa;margin-top:8px;">previous<br>${prevTime}</div>
     </div>`;
   document.body.appendChild(banner);
   banner.addEventListener('click', () => {
@@ -1489,6 +1519,31 @@ function launchPRCelebration(newTime, prevTime) {
     setTimeout(() => banner.remove(), 300);
   }, 5000);
 }
+
+// ── Tooltip positioning ───────────────────────────────────
+let _activeTooltip = null;
+
+document.addEventListener('mouseover', e => {
+  const btn = e.target.closest('.pill-info-btn');
+  if (!btn) return;
+  const tooltip = btn.querySelector('.pill-tooltip');
+  if (!tooltip) return;
+  // Move to body to escape stacking contexts
+  if (_activeTooltip) _activeTooltip.remove();
+  const clone = tooltip.cloneNode(true);
+  clone.style.display = 'block';
+  document.body.appendChild(clone);
+  _activeTooltip = clone;
+  const rect = btn.getBoundingClientRect();
+  clone.style.left = Math.min(rect.left, window.innerWidth - 210) + 'px';
+  clone.style.top = (rect.top - clone.offsetHeight - 6) + 'px';
+});
+
+document.addEventListener('mouseout', e => {
+  const btn = e.target.closest('.pill-info-btn');
+  if (!btn) return;
+  if (_activeTooltip) { _activeTooltip.remove(); _activeTooltip = null; }
+});
 
 // ── Fireworks ─────────────────────────────────────────────
 const fwCanvas = document.createElement('canvas');
