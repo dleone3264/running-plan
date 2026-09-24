@@ -78,6 +78,8 @@
     cursor: pointer;
     transition: box-shadow 0.15s ease, transform 0.1s ease;
     position: relative;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
   .lc-day.drag-over { box-shadow: 0 0 0 2px var(--check-color); transform: scale(1.02); }
   .lc-day.complete { box-shadow: 0 0 0 2px #c9a05c55; border-color: var(--gold); }
@@ -85,7 +87,7 @@
   .lc-day-date { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 700; margin: 2px 0 6px; color: var(--text-primary); }
   .lc-comp-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px; }
   .lc-day.open .lc-comp-list { flex-direction: column; flex-wrap: nowrap; gap: 0; }
-  .lc-comp-add-row { display: none; gap: 6px; margin-top: 8px; }
+  .lc-comp-add-row { display: none; flex-direction: column; gap: 6px; margin-top: 8px; }
   .lc-day.open .lc-comp-add-row { display: flex; }
   .lc-comp { cursor: default; flex: 0 1 auto; min-width: 0; max-width: 100%; }
   .lc-day.open .lc-comp { cursor: grab; padding: 9px 0; border-bottom: 0.5px solid var(--border); flex: none; }
@@ -169,7 +171,7 @@
   .lc-dv-add-row { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
   .lc-add-btn, .lc-add-btn-sm { border: 1px dashed var(--border-mid); background: none; color: var(--text-secondary); font-size: 12.5px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border-radius: 7px; padding: 8px 14px; }
   .lc-add-btn:hover, .lc-add-btn-sm:hover { background: #e4eaf0; color: var(--text-primary); }
-  .lc-add-btn-sm { padding: 6px 10px; font-size: 11.5px; border-radius: 6px; flex: 1; text-align: center; }
+  .lc-add-btn-sm { padding: 6px 10px; font-size: 11.5px; border-radius: 6px; width: 100%; box-sizing: border-box; text-align: center; }
   .lc-remove-btn { border: none; background: none; color: var(--text-secondary); font-size: 15px; line-height: 1; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
   .lc-day .lc-remove-btn { display: none; }
   .lc-day.open .lc-remove-btn { display: inline-block; }
@@ -1011,7 +1013,7 @@
 
         const yogaCompHtml = hasExtraYoga ? `
           <div class="lc-comp${compClass("yoga")}" draggable="true" data-comp="yoga">
-            ${compHead("yoga", YOGA_EXTRA.n, YOGA_EXTRA.badgeBg, YOGA_EXTRA.badgeText, true)}
+            ${compHead("yoga", YOGA_EXTRA.n, YOGA_EXTRA.badgeBg, YOGA_EXTRA.badgeText, false)}
             <ul class="lc-ex-list">
               <li class="lc-ex${exClass(extraYogaState)}" data-key="${extraYogaKey}">
                 ${boxHtml(extraYogaKey, YOGA_EXTRA.color)}
