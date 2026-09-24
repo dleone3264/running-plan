@@ -234,6 +234,8 @@
   let extraMobility = DEFAULT_EXTRA_MOBILITY.slice();
   let yogaOverrides = {};    // dateIso -> true/false, one-off exceptions to the recurring extraYoga pattern
   let mobilityOverrides = {}; // dateIso -> true/false, one-off exceptions to the recurring extraMobility pattern
+  let dayTypeOverrides = {}; // dateIso -> type key, one-off exceptions to the recurring dayTypes pattern
+  let runOverrides = {};     // dateIso -> true/false, one-off exceptions to the recurring extraRun pattern
   let checks = {};
   let logs = {};
   let openWeeks = {};
@@ -315,6 +317,14 @@
       if (mo && mo.value) mobilityOverrides = JSON.parse(mo.value);
     } catch (e) {}
     try {
+      const dto = await window.storage.get("runlift-cal-daytypeoverrides", false);
+      if (dto && dto.value) dayTypeOverrides = JSON.parse(dto.value);
+    } catch (e) {}
+    try {
+      const ro = await window.storage.get("runlift-cal-runoverrides", false);
+      if (ro && ro.value) runOverrides = JSON.parse(ro.value);
+    } catch (e) {}
+    try {
       const c = await window.storage.get("runlift-cal-checks", false);
       if (c && c.value) checks = JSON.parse(c.value);
     } catch (e) {}
@@ -367,6 +377,12 @@
   async function saveMobilityOverrides() {
     try { await window.storage.set("runlift-cal-mobilityoverrides", JSON.stringify(mobilityOverrides), false); } catch (e) {}
   }
+  async function saveDayTypeOverrides() {
+    try { await window.storage.set("runlift-cal-daytypeoverrides", JSON.stringify(dayTypeOverrides), false); } catch (e) {}
+  }
+  async function saveRunOverrides() {
+    try { await window.storage.set("runlift-cal-runoverrides", JSON.stringify(runOverrides), false); } catch (e) {}
+  }
   // Effective on/off state for a specific date: a one-off override wins over the recurring weekly pattern.
   function effectiveYoga(dateIso, dowIndex) {
     return yogaOverrides.hasOwnProperty(dateIso) ? yogaOverrides[dateIso] : !!extraYoga[dowIndex];
@@ -374,13 +390,21 @@
   function effectiveMobility(dateIso, dowIndex) {
     return mobilityOverrides.hasOwnProperty(dateIso) ? mobilityOverrides[dateIso] : !!extraMobility[dowIndex];
   }
+  function effectiveDayType(dateIso, dowIndex) {
+    return dayTypeOverrides.hasOwnProperty(dateIso) ? dayTypeOverrides[dateIso] : dayTypes[dowIndex];
+  }
+  function effectiveRun(dateIso, dowIndex) {
+    return runOverrides.hasOwnProperty(dateIso) ? runOverrides[dateIso] : !!extraRun[dowIndex];
+  }
   async function swapComponent(src, target, comp) {
     if (comp === "lift") {
-      const tmp = dayTypes[src.day]; dayTypes[src.day] = dayTypes[target.day]; dayTypes[target.day] = tmp;
-      await saveDayTypes();
+      const a = effectiveDayType(src.dIso, src.day), b = effectiveDayType(target.dIso, target.day);
+      dayTypeOverrides[src.dIso] = b; dayTypeOverrides[target.dIso] = a;
+      await saveDayTypeOverrides();
     } else if (comp === "run") {
-      const tmp = extraRun[src.day]; extraRun[src.day] = extraRun[target.day]; extraRun[target.day] = tmp;
-      await saveExtraRun();
+      const a = effectiveRun(src.dIso, src.day), b = effectiveRun(target.dIso, target.day);
+      runOverrides[src.dIso] = b; runOverrides[target.dIso] = a;
+      await saveRunOverrides();
     } else if (comp === "yoga") {
       const a = effectiveYoga(src.dIso, src.day), b = effectiveYoga(target.dIso, target.day);
       yogaOverrides[src.dIso] = b; yogaOverrides[target.dIso] = a;
@@ -473,9 +497,9 @@
       dates.forEach((d, i) => {
         const dIso = isoDate(d);
         const dayName = d.toLocaleDateString(undefined, { weekday: "short" });
-        const typeKey = dayTypes[i];
+        const typeKey = effectiveDayType(dIso, i);
         const type = TYPES[typeKey];
-        const hasExtraRun = !!extraRun[i];
+        const hasExtraRun = effectiveRun(dIso, i);
         const hasExtraYoga = effectiveYoga(dIso, i);
         const hasExtraMobility = effectiveMobility(dIso, i);
 
@@ -552,7 +576,7 @@
     let done = 0, total = 0;
     dates.forEach((d, i) => {
       const dIso = isoDate(d);
-      const p = dayProgress(dIso, dayTypes[i], extraRun[i], effectiveYoga(dIso, i), effectiveMobility(dIso, i));
+      const p = dayProgress(dIso, effectiveDayType(dIso, i), effectiveRun(dIso, i), effectiveYoga(dIso, i), effectiveMobility(dIso, i));
       done += p.done; total += p.total;
     });
     return { done, total };
@@ -582,7 +606,7 @@
     let done = 0, total = 0;
     dates.forEach((d, i) => {
       const dIso = isoDate(d);
-      const p = dayCategoryProgress(dIso, dayTypes[i], extraRun[i], effectiveYoga(dIso, i), effectiveMobility(dIso, i), category);
+      const p = dayCategoryProgress(dIso, effectiveDayType(dIso, i), effectiveRun(dIso, i), effectiveYoga(dIso, i), effectiveMobility(dIso, i), category);
       done += p.done; total += p.total;
     });
     return { done, total };
@@ -590,9 +614,9 @@
   function weekStrengthSets(dates) {
     let done = 0, total = 0;
     dates.forEach((d, i) => {
-      const type = TYPES[dayTypes[i]];
-      if (type.category !== "strength") return;
       const dIso = isoDate(d);
+      const type = TYPES[effectiveDayType(dIso, i)];
+      if (type.category !== "strength") return;
       type.exercises.forEach((ex, idx) => {
         total += ex.sets;
         if (checks[`${dIso}-${idx}`] === "done") done += ex.sets;
@@ -671,7 +695,7 @@
         <button data-mode="day" class="${viewMode === "day" ? "active" : ""}">Day-by-day</button>
         <button data-mode="week" class="${viewMode === "week" ? "active" : ""}">Week grid</button>
       </div>
-      ${viewMode === "week" ? `<div class="lc-hint">Drag a run or lift block to another day to shift your weekly pattern going forward (or tap its ⇄, then tap ⇄ on the target day). Dragging yoga or mobility only affects that one day.</div>` : ""}
+      ${viewMode === "week" ? `<div class="lc-hint">Drag any block to another day to swap it there for that week only (or tap its ⇄, then tap ⇄ on the target day). Your regular weekly pattern isn't changed.</div>` : ""}
       <div id="lc-body"></div>
     `;
 
@@ -705,9 +729,9 @@
     const entry = allDays[dayViewIndex];
     const d = entry.date;
     const dIso = isoDate(d);
-    const typeKey = dayTypes[entry.dowIndex];
+    const typeKey = effectiveDayType(dIso, entry.dowIndex);
     const type = TYPES[typeKey];
-    const hasExtraRun = !!extraRun[entry.dowIndex];
+    const hasExtraRun = effectiveRun(dIso, entry.dowIndex);
     const hasExtraYoga = effectiveYoga(dIso, entry.dowIndex);
     const hasExtraMobility = effectiveMobility(dIso, entry.dowIndex);
     const p = dayProgress(dIso, typeKey, hasExtraRun, hasExtraYoga, hasExtraMobility);
@@ -918,10 +942,10 @@
 
       const grid = weekEl.querySelector(`#lc-grid-${wi}`);
       dates.forEach((d, i) => {
-        const typeKey = dayTypes[i];
-        const type = TYPES[typeKey];
-        const hasExtraRun = !!extraRun[i];
         const dIso = isoDate(d);
+        const typeKey = effectiveDayType(dIso, i);
+        const type = TYPES[typeKey];
+        const hasExtraRun = effectiveRun(dIso, i);
         const hasExtraYoga = effectiveYoga(dIso, i);
         const hasExtraMobility = effectiveMobility(dIso, i);
         const p = dayProgress(dIso, typeKey, hasExtraRun, hasExtraYoga, hasExtraMobility);
@@ -981,7 +1005,7 @@
 
         const liftCompHtml = type.exercises.length ? `
           <div class="lc-comp${compClass("lift")}" draggable="true" data-comp="lift">
-            ${compHead("lift", type.label, type.badgeBg, type.badgeText, false)}
+            ${compHead("lift", "Lift", type.badgeBg, type.badgeText, false)}
             <ul class="lc-ex-list">${mainExHtml}</ul>
           </div>` : "";
 
@@ -1125,14 +1149,15 @@
       weekEl.querySelector(".lc-reset").addEventListener("click", async (e) => {
         e.stopPropagation();
         dates.forEach((d, i) => {
-          const type = TYPES[dayTypes[i]];
+          const dIso = isoDate(d);
+          const type = TYPES[effectiveDayType(dIso, i)];
           type.exercises.forEach((_, idx) => {
-            delete checks[`${isoDate(d)}-${idx}`];
-            delete logs[`${isoDate(d)}-${idx}`];
+            delete checks[`${dIso}-${idx}`];
+            delete logs[`${dIso}-${idx}`];
           });
-          delete checks[`${isoDate(d)}-extra-run`];
-          delete checks[`${isoDate(d)}-extra-yoga`];
-          delete checks[`${isoDate(d)}-extra-mobility`];
+          delete checks[`${dIso}-extra-run`];
+          delete checks[`${dIso}-extra-yoga`];
+          delete checks[`${dIso}-extra-mobility`];
         });
         await saveChecks();
         await saveLogs();
